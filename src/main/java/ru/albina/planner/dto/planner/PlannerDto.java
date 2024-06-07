@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 @Builder
 public class PlannerDto {
-    private int monthlyHours;
+    private double monthlyHours;
     private List<DoctorDto> doctors;
     private List<WorkloadDto> workload;
     private List<ScheduleDto> schedule;

@@ -28,7 +28,7 @@ public interface MedicalMapper {
 
     default Map<String, Integer> performances(List<Performance> performances) {
         return performances.stream()
-                .map(performance -> Map.entry(performance.getModality() + "_" + performance.getTypeModality(), performance.getValue()))
+                .map(performance -> Map.entry(ModalityMapper.to(performance.getModality(), performance.getTypeModality()), performance.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import ru.albina.backlib.configuration.WebConstants;
 import ru.albina.planner.dto.medical.Doctor;
 import ru.albina.planner.dto.reference.GetOrGenerateYearlyWorkloadRequest;
+import ru.albina.planner.dto.reference.HoursPerMonthValue;
 import ru.albina.planner.dto.reference.Workload;
 
 import java.util.Collection;
@@ -32,5 +33,14 @@ public class ReferenceClient {
                 .bodyToMono(new ParameterizedTypeReference<List<Workload>>() {
                 })
                 .block();
+    }
+
+    public double getHours(int year, int month) {
+        return this.webClient.get()
+                .uri( uriBuilder->uriBuilder.path(WebConstants.FULL_PRIVATE + "/hours-per-month/{year}/months/{month}").build(year, month))
+                .retrieve()
+                .bodyToMono(HoursPerMonthValue.class)
+                .block()
+                .getHours();
     }
 }

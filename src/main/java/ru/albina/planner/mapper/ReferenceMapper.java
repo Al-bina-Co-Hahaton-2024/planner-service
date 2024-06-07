@@ -17,7 +17,7 @@ public interface ReferenceMapper {
 
 
     default String modality(Workload workload) {
-        return workload.getModality() + "_" + workload.getTypeModality();
+        return ModalityMapper.to(workload.getModality(), workload.getTypeModality());
     }
 
     default Long value(Workload workload) {

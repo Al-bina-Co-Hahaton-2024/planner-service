@@ -1,5 +1,8 @@
 package ru.albina.planner.dto.planner;
 
+import lombok.Builder;
+
+@Builder
 public class TaskDto {
 
     private String modality;
