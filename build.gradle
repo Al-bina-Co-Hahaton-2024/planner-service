@@ -1,0 +1,64 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.1.5'
+    id 'io.spring.dependency-management' version '1.1.3'
+}
+
+java {
+    sourceCompatibility = '17'
+}
+
+jar {
+    enabled = false
+}
+
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/al-bina-co-hahaton-2024/back-library")
+        credentials {
+            username = "token"
+            password = findProperty("github.self.token") ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+
+ext {
+    springDocVersion = "2.2.0"
+    mapStructVersion = '1.5.3.Final'
+    mapStructLombokVersion = '0.2.0'
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.7.5'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion"
+
+    implementation 'ru.albina:backlib:0.7.0'
+    implementation "org.mapstruct:mapstruct:$mapStructVersion"
+    annotationProcessor "org.projectlombok:lombok-mapstruct-binding:$mapStructLombokVersion"
+    annotationProcessor "org.mapstruct:mapstruct-processor:$mapStructVersion"
+
+    annotationProcessor('org.hibernate:hibernate-jpamodelgen:6.4.1.Final')
+    implementation 'org.liquibase:liquibase-core'
+
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    runtimeOnly 'org.postgresql:postgresql'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+

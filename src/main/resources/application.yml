@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: -service #TODO[Template]
+  datasource:
+    username: ${DATABASE_USER:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    url: ${DATABASE_HOST_JDBC:jdbc:postgresql://localhost:5432}/_backend #TODO[Template] Change DB
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    change-log: classpath:/db/master.xml
+  main:
+    allow-bean-definition-overriding: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+server:
+  port: ${SERVER_HTTP_PORT:8080}
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
+  api-docs:
+    path: /api-docs
