@@ -1,3 +1,3 @@
-package ru.albina._backend.dto.response;
+package ru.albina.planner.dto.response;
 
 public record ErrorDto(String error) {}

@@ -1,11 +1,11 @@
-package ru.albina._backend.controller;
+package ru.albina.planner.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.albina._backend.dto.response.ErrorDto;
-import ru.albina._backend.exception.EntityNotFoundException;
+import ru.albina.planner.dto.response.ErrorDto;
+import ru.albina.planner.exception.EntityNotFoundException;
 
 @RestControllerAdvice
 public class WebExceptionHandler {

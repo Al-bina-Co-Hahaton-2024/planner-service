@@ -1,4 +1,4 @@
-package ru.albina._backend;
+package ru.albina.planner;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

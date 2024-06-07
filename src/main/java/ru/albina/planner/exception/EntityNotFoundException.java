@@ -1,4 +1,4 @@
-package ru.albina._backend.exception;
+package ru.albina.planner.exception;
 
 public class EntityNotFoundException extends RuntimeException {
     public EntityNotFoundException(String message) {

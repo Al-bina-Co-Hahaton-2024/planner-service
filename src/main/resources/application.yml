@@ -1,10 +1,10 @@
 spring:
   application:
-    name: -service #TODO[Template]
+    name: planner
   datasource:
     username: ${DATABASE_USER:postgres}
     password: ${DATABASE_PASSWORD:postgres}
-    url: ${DATABASE_HOST_JDBC:jdbc:postgresql://localhost:5432}/_backend #TODO[Template] Change DB
+    url: ${DATABASE_HOST_JDBC:jdbc:postgresql://localhost:5432}/planner
     driver-class-name: org.postgresql.Driver
   liquibase:
     change-log: classpath:/db/master.xml
