@@ -10,6 +10,7 @@ import ru.albina.planner.dto.reference.WeekNumberResult;
 import ru.albina.planner.dto.reference.Workload;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,9 +47,18 @@ public class ReferenceClient {
 
     public WeekNumberResult getWeek(LocalDate localDate) {
         return this.webClient.get()
-                .uri(uriBuilder -> uriBuilder.path(WebConstants.FULL_PRIVATE + "/week-numbers").queryParam("date", localDate).build())
+                .uri(uriBuilder -> uriBuilder.path(WebConstants.FULL_PRIVATE + "/week-numbers/").queryParam("date", localDate).build())
                 .retrieve()
                 .bodyToMono(WeekNumberResult.class)
+                .block();
+    }
+
+    public List<WeekNumberResult> getWeeks(Collection<LocalDate> localDates) {
+        return this.webClient.get()
+                .uri(uriBuilder -> uriBuilder.path(WebConstants.FULL_PRIVATE + "/week-numbers").queryParam("dates", localDates).build())
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<WeekNumberResult>>() {
+                })
                 .block();
     }
 }
