@@ -30,6 +30,10 @@ public class WorkScheduleEntity {
     @Column(name = "week_number", nullable = false)
     private Integer weekNumber;
 
+    @NotNull
+    @Column(name = "is_actual", nullable = false)
+    private Boolean isActual = false;
+
     @OneToMany(mappedBy = "workSchedule", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DoctorScheduleEntity> doctorSchedules = new ArrayList<>();
 

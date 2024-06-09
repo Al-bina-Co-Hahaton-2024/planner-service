@@ -27,6 +27,7 @@ public class WorkScheduleService {
                                 .setId(UUID.randomUUID())
                                 .setDate(date)
                                 .setWeekNumber(this.referenceClient.getWeek(date).getWeekNumber())
+                                .setIsActual(false)
                 )
         );
     }

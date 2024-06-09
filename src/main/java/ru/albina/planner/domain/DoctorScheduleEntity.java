@@ -36,10 +36,6 @@ public class DoctorScheduleEntity {
     @Column(name = "force_schedule", nullable = false)
     private Boolean forceSchedule = false;
 
-    @NotNull
-    @Column(name = "is_actual", nullable = false)
-    private Boolean isActual = false;
-
     @OneToMany(mappedBy = "doctorSchedule", fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
     private List<DoctorWorkEntity> doctorWorks = new ArrayList<>();
 

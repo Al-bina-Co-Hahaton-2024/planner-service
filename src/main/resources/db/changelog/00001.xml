@@ -56,4 +56,12 @@
             <column name="used_extra_hours" type="double"/>
         </createTable>
     </changeSet>
+    <changeSet id="002" author="alexander (bigtows) chapchuk">
+        <addColumn tableName="work_schedule">
+            <column name="is_actual" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <dropColumn tableName="doctor_schedule" columnName="is_actual"/>
+    </changeSet>
 </databaseChangeLog>

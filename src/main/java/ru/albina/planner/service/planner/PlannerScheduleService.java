@@ -10,8 +10,7 @@ import ru.albina.planner.dto.planner.DoctorScheduleDto;
 import ru.albina.planner.dto.planner.ScheduleDto;
 import ru.albina.planner.dto.planner.TaskDto;
 import ru.albina.planner.mapper.ModalityMapper;
-import ru.albina.planner.service.calendar.CalendarService;
-import ru.albina.planner.service.schedule.WorkScheduleService;
+import ru.albina.planner.service.schedule.MonthWorkScheduleService;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -21,16 +20,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PlannerScheduleService {
 
-    private final CalendarService calendarService;
-    private final WorkScheduleService workScheduleService;
+    private final MonthWorkScheduleService monthWorkScheduleService;
 
     @Transactional
     public List<ScheduleDto> generate(LocalDate startDate) {
         final var result = new LinkedList<ScheduleDto>();
 
-        final var schedule = this.calendarService.getAllDaysAtMonth(startDate)
+        final var schedule = this.monthWorkScheduleService.getAllAtMonth(startDate)
                 .stream()
-                .map(this.workScheduleService::createOrGet)
                 .collect(Collectors.groupingBy(WorkScheduleEntity::getWeekNumber, Collectors.toList()));
         for (final var weekToDay : schedule.entrySet()) {
             final var days = weekToDay.getValue().stream()
