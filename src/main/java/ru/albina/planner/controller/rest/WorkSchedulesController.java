@@ -15,6 +15,7 @@ import ru.albina.planner.dto.response.schedule.DayWorkSchedule;
 import ru.albina.planner.service.planner.PlannerGeneratorService;
 import ru.albina.planner.service.schedule.WorkScheduleUserService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -41,9 +42,9 @@ public class WorkSchedulesController {
     //TODO @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping
     public List<DayWorkSchedule> getWorkSchedules(
-            @RequestBody WorkSchedulesRequest workSchedulesRequest
+            @RequestParam("date") LocalDate workScheduleDate
     ) {
-        return this.workScheduleUserService.getDayWorkSchedules(workSchedulesRequest.getWorkScheduleDate());
+        return this.workScheduleUserService.getDayWorkSchedules(workScheduleDate);
     }
 
     @Operation(
@@ -60,9 +61,9 @@ public class WorkSchedulesController {
     @GetMapping("/me")
     public List<DayWorkSchedule> getWorkSchedules(
             LibPrincipal principal,
-            @RequestBody WorkSchedulesRequest workSchedulesRequest
+            @RequestParam("date") LocalDate workScheduleDate
     ) {
-        return this.workScheduleUserService.getDayWorkSchedulesForDoctor(workSchedulesRequest.getWorkScheduleDate(), principal.getPrincipal().id());
+        return this.workScheduleUserService.getDayWorkSchedulesForDoctor(workScheduleDate, principal.getPrincipal().id());
     }
 
     @Operation(
