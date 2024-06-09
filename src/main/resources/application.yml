@@ -14,7 +14,7 @@ spring:
     hibernate:
       ddl-auto: validate
 server:
-  port: ${SERVER_HTTP_PORT:8080}
+  port: ${SERVER_HTTP_PORT:8084}
 springdoc:
   swagger-ui:
     path: /swagger-ui

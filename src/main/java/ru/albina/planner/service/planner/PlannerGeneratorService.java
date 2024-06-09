@@ -16,6 +16,7 @@ public class PlannerGeneratorService {
     private final PlannerDoctorService plannerDoctorService;
     private final PlannerWorkloadService plannerWorkloadService;
     private final PlannerWeekNumberService weekNumberService;
+    private final PlannerScheduleService plannerScheduleService;
 
     public PlannerDto generateRequest(LocalDate templateDate) {
         final var startDate = templateDate.atStartOfDay().toLocalDate();
@@ -24,7 +25,7 @@ public class PlannerGeneratorService {
                 .doctors(this.plannerDoctorService.generateDoctors())
                 .workload(this.plannerWorkloadService.generate(startDate))
                 .weekNumbers(this.weekNumberService.generate(startDate))
-                //TODO.schedule()
+                .schedule(this.plannerScheduleService.generate(startDate))
                 .build();
     }
 }

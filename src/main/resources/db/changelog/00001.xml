@@ -5,6 +5,55 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-<!--    <changeSet id="001" author="alexander (bigtows) chapchuk">-->
-<!--    </changeSet>-->
+    <changeSet id="001" author="alexander (bigtows) chapchuk">
+        <createTable tableName="work_schedule">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="week_number" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="doctor_schedule">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="doctor_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="work_schedule_id" type="uuid">
+                <constraints
+                        nullable="false" referencedTableName="work_schedule" referencedColumnNames="id"
+                        foreignKeyName="work_schedule_id_fk"/>
+            </column>
+            <column name="force_schedule" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="manual_extra_hours" type="double">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_actual" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="doctor_schedule" columnNames="doctor_id,work_schedule_id"/>
+        <createTable tableName="doctor_work">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="doctor_schedule_id" type="uuid">
+                <constraints
+                        nullable="false"
+                        referencedTableName="doctor_schedule" referencedColumnNames="id"
+                        foreignKeyName="doctor_schedule_id"/>
+            </column>
+            <column name="modality" type="varchar(30)"/>
+            <column name="type_modality" type="varchar(30)"/>
+            <column name="used_hours" type="double"/>
+            <column name="used_extra_hours" type="double"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
