@@ -9,6 +9,8 @@ import ru.albina.planner.domain.DoctorScheduleEntity;
 import ru.albina.planner.domain.DoctorWorkEntity;
 import ru.albina.planner.dto.response.schedule.DoctorLoad;
 
+import java.util.Optional;
+
 @Mapper(config = MapperConfiguration.class)
 public interface DoctorScheduleMapper {
 
@@ -24,8 +26,8 @@ public interface DoctorScheduleMapper {
         var usedExtraHours = 0.d;
 
         for (DoctorWorkEntity doctorWork : entity.getDoctorWorks()) {
-            usedHours += doctorWork.getUsedHours();
-            usedExtraHours += doctorWork.getUsedExtraHours();
+            usedHours += Optional.ofNullable(doctorWork.getUsedHours()).orElse(0.d);
+            usedExtraHours += Optional.ofNullable(doctorWork.getUsedExtraHours()).orElse(0.d);
         }
 
         doctorLoad.takenHours(usedHours);

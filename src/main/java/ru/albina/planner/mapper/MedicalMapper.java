@@ -21,6 +21,9 @@ public interface MedicalMapper {
 
 
     default Set<String> modality(Modality modality) {
+        if (modality == null){
+            return Collections.emptySet();
+        }
         final var hashSet = new HashSet<String>();
         hashSet.add(ModalityMapper.to(modality, TypeModality.DEFAULT));
         if (modality == Modality.KT || modality == Modality.MRT) {
