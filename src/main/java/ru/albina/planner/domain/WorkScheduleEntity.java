@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDate;
 import java.util.LinkedList;
@@ -34,6 +35,7 @@ public class WorkScheduleEntity {
     @Column(name = "is_actual", nullable = false)
     private Boolean isActual = false;
 
+    @BatchSize(size = 9000)
     @OneToMany(mappedBy = "workSchedule", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DoctorScheduleEntity> doctorSchedules = new LinkedList<>();
 

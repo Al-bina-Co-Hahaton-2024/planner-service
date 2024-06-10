@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,7 @@ public class DoctorScheduleEntity {
     @Column(name = "force_schedule", nullable = false)
     private Boolean forceSchedule = false;
 
+    @BatchSize(size = 9000)
     @OneToMany(mappedBy = "doctorSchedule", fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
     private List<DoctorWorkEntity> doctorWorks = new ArrayList<>();
 

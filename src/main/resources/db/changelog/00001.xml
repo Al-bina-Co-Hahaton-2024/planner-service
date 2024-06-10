@@ -64,4 +64,12 @@
         </addColumn>
         <dropColumn tableName="doctor_schedule" columnName="is_actual"/>
     </changeSet>
+    <changeSet id="003" author="alexander (bigtows) chapchuk">
+        <createIndex tableName="doctor_schedule" indexName="work_schedule_id_index">
+            <column name="work_schedule_id"/>
+        </createIndex>
+        <createIndex tableName="doctor_work" indexName="doctor_schedule_id_index">
+            <column name="doctor_schedule_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
