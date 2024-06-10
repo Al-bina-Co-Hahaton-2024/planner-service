@@ -1,8 +1,6 @@
 package ru.albina.planner.service;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.albina.planner.dto.planner.*;
@@ -79,7 +77,7 @@ public class DistributorService {
                             break;
                         }
 
-                        month.addWork(doctor, workingWeek, localDate, modalityToHours.getKey(), modalityToHours.getValue());
+                        month.addWork(doctor, workingWeek, localDate, modalityToHours.getKey(), availableHours);
                         if (workingWeek.isOverhead(doctor.getId())) {
                             break;
                         }
@@ -156,12 +154,13 @@ public class DistributorService {
                 .toList();
     }
 
-
+    @Getter
+    @NoArgsConstructor
     static class Month {
-        private final LocalDate month;
-        private final Double monthDouble;
-        private final Map<UUID, Double> hours = new HashMap<>();
-        private final Map<Integer, Week> weeks;
+        private LocalDate month;
+        private Double monthDouble;
+        private Map<UUID, Double> hours = new HashMap<>();
+        private Map<Integer, Week> weeks;
 
         public Month(LocalDate month, Double monthDouble, List<WeekNumberResult> weekNumbers, List<WorkloadDto> workload) {
             this.month = month.withDayOfMonth(1);
@@ -186,7 +185,7 @@ public class DistributorService {
         }
 
         public boolean isOverhead(DoctorDto doctorDto) {
-            return this.hours.getOrDefault(doctorDto.getId(), 0d) >= this.calculateHours(doctorDto);
+            return this.hours.getOrDefault(doctorDto.getId(), 0d) > this.calculateHours(doctorDto);
         }
 
         public void addHours(DoctorDto doctorDto, LocalDate date, double hours) {
@@ -201,7 +200,7 @@ public class DistributorService {
             }
 
             if (this.isOverhead(doctorDto)) {
-                log.warn("{} has more than {}", doctorId, this.month);
+                log.warn("{} has more than {} at {}", doctorId, this.calculateHours(doctorDto), this.month);
             }
         }
 
@@ -220,8 +219,9 @@ public class DistributorService {
     }
 
     @Getter
+    @NoArgsConstructor
     static class Week {
-        private final LocalDate start;
+        private LocalDate start;
         private final Map<UUID, Double> hours = new HashMap<>();
 
         private final Map<LocalDate, Day> days = new HashMap<>();
@@ -288,7 +288,7 @@ public class DistributorService {
         }
 
         public boolean isOverhead(UUID doctorId) {
-            return this.hours.getOrDefault(doctorId, 0d) >= 40;
+            return this.hours.getOrDefault(doctorId, 0d) > 40;
         }
 
         public void addHours(UUID doctorId, double hours) {
@@ -306,6 +306,7 @@ public class DistributorService {
         public void addWork(DoctorDto doctor, LocalDate date, String modality, Double hours) {
             final var day = this.getDay(date);
             final var performance = Math.round(hours * doctor.getPerformances().get(modality));
+            workloads.put(modality, workloads.get(modality) - performance);
             day.addWork(doctor.getId(), modality, performance, hours);
             this.addHours(doctor.getId(), hours);
         }
@@ -316,11 +317,13 @@ public class DistributorService {
     }
 
     @Getter
+    @NoArgsConstructor
     @Builder
+    @AllArgsConstructor
     static class Day {
-        private final LocalDate date;
+        private  LocalDate date;
         private final Map<UUID, DoctorDay> doctors = new HashMap<>();
-        private final Map<String, Long> workloads;
+        private  Map<String, Long> workloads;
 
         public void addWork(UUID doctorId, String modality, long performance, double hours) {
             workloads.put(modality, workloads.get(modality) - performance);
@@ -331,6 +334,8 @@ public class DistributorService {
         }
     }
 
+    @Getter
+    @NoArgsConstructor
     @Builder
     static class DoctorDay {
         //hours

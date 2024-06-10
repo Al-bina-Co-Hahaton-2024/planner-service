@@ -7,7 +7,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.albina.planner.dto.planner.DoctorDto;
 import ru.albina.planner.dto.planner.PlannerDto;
+import ru.albina.planner.dto.planner.WorkloadDto;
+import ru.albina.planner.dto.reference.WeekNumberResult;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
 class DistributorServiceTest {
@@ -28,6 +37,88 @@ class DistributorServiceTest {
                 );
 
         final var plan = this.distributorService.distributeDoctors(data);
+
+        // assertThat(plan.get(LocalDate.of(2023,6,18)))
+
+    }
+
+
+    @Test
+    void goodData() throws JsonProcessingException {
+        final var doctor = UUID.randomUUID();
+        final var plan = this.distributorService.distributeDoctors(
+                PlannerDto.builder()
+                        .month(LocalDate.of(2023, 6,1))
+                        .doctors(
+                                List.of(
+                                        DoctorDto.builder()
+                                                .id(doctor)
+                                                .hours(12d)
+                                                .rate(1d)
+                                                .modality(Set.of("DENSITOMETER"))
+                                                .optionalModality(Set.of())
+                                                .workDays(List.of(4, 7))
+                                                .absenceSchedules(List.of(
+                                                        LocalDate.of(2024, 6, 6),
+                                                        LocalDate.of(2024, 6, 7),
+                                                        LocalDate.of(2024, 6, 8),
+                                                        LocalDate.of(2024, 6, 9),
+                                                        LocalDate.of(2024, 6, 10))
+                                                )
+                                                .performances(Map.of(
+                                                        "FLG", 1,
+                                                        "RG", 1,
+                                                        "MRT_U", 1,
+                                                        "MMG", 1,
+                                                        "KT", 1,
+                                                        "DENSITOMETER", 1,
+                                                        "KT_U2", 1,
+                                                        "KT_U", 1,
+                                                        "MRT_U2", 1,
+                                                        "MRT", 1))
+                                                .build()
+                                )
+                        )
+                        .workload(
+                                List.of(
+                                        WorkloadDto.builder()
+                                                .value(10L)
+                                                .modality("DENSITOMETER")
+                                                .week(1)
+                                                .build(),
+                                        WorkloadDto.builder()
+                                                .value(10L)
+                                                .modality("KT")
+                                                .week(1)
+                                                .build(),
+                                        WorkloadDto.builder()
+                                                .value(10L)
+                                                .modality("DENSITOMETER")
+                                                .week(2)
+                                                .build()
+                                )
+                        )
+                        .monthlyHours(100d)
+                        .weekNumbers(
+                                List.of(
+                                        WeekNumberResult.builder()
+                                                .weekNumber(1)
+                                                .startDate(LocalDate.of(2023, 6,1))
+                                                .endDate(LocalDate.of(2023, 6,7))
+                                                .build(),
+                                        WeekNumberResult.builder()
+                                                .weekNumber(2)
+                                                .startDate(LocalDate.of(2023, 6,8))
+                                                .endDate(LocalDate.of(2023, 6,14))
+                                                .build()
+                                )
+                        )
+                        .schedule(
+                                List.of(
+
+                                )
+                        )
+                .build());
 
         // assertThat(plan.get(LocalDate.of(2023,6,18)))
 
