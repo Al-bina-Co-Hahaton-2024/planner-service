@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 import ru.albina.planner.domain.WorkScheduleEntity;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,4 +14,6 @@ import java.util.UUID;
 public interface WorkScheduleRepository extends JpaRepository<WorkScheduleEntity, UUID> {
 
     Optional<WorkScheduleEntity> findByDate(LocalDate date);
+
+    List<WorkScheduleEntity> findAllByDateIn(Collection<LocalDate> date);
 }
