@@ -36,4 +36,9 @@ public class WorkScheduleService {
     public Optional<WorkScheduleEntity> findByDate(LocalDate date) {
         return this.workScheduleRepository.findByDate(date);
     }
+
+    @Transactional
+    public void save(WorkScheduleEntity day) {
+        this.workScheduleRepository.save(day);
+    }
 }

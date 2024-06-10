@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import ru.albina.planner.dto.TypeModality;
 import ru.albina.planner.dto.medical.Modality;
 
@@ -14,6 +15,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "doctor_work")
+@Accessors(chain = true)
 public class DoctorWorkEntity {
     @Id
     @Column(name = "id", nullable = false)

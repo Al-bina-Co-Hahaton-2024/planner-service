@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -35,7 +35,7 @@ public class WorkScheduleEntity {
     private Boolean isActual = false;
 
     @OneToMany(mappedBy = "workSchedule", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DoctorScheduleEntity> doctorSchedules = new ArrayList<>();
+    private List<DoctorScheduleEntity> doctorSchedules = new LinkedList<>();
 
 
     @Override

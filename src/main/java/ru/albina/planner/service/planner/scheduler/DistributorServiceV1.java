@@ -1,10 +1,13 @@
-package ru.albina.planner.service;
+package ru.albina.planner.service.planner.scheduler;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.albina.planner.dto.planner.*;
 import ru.albina.planner.dto.reference.WeekNumberResult;
+import ru.albina.planner.dto.response.data.DoctorDayDto;
+import ru.albina.planner.dto.response.data.TaskDayDto;
+import ru.albina.planner.mapper.ModalityMapper;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -19,7 +22,7 @@ import java.util.stream.IntStream;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DistributorService {
+public class DistributorServiceV1 implements DistributorService {
 
     /*
     Правила
@@ -27,15 +30,18 @@ public class DistributorService {
         На день в неделю
      */
 
-    private static final Double RATE = 1d;
-
-    public Map<LocalDate, DoctorDto> distributeDoctors(PlannerDto planner) {
-
-        final var hours = new HashMap<UUID, Long>();
+    @Override
+    public Map<LocalDate, List<DoctorDayDto>> distributeDoctors(PlannerDto planner) {
         final var doctors = planner.getDoctors().stream().collect(Collectors.toMap(DoctorDto::getId, Function.identity()));
+        planner.setDoctors(
+                planner.getDoctors().stream().sorted((doctor1, doctor2) -> {
+                    int sum1 = doctor1.getModality().size() + doctor1.getOptionalModality().size();
+                    int sum2 = doctor2.getModality().size() + doctor2.getOptionalModality().size();
+                    return Integer.compare(sum1, sum2);
+                }).collect(Collectors.toList())
+        );
 
-
-        final var month = new Month(LocalDate.of(2023, 6, 1), planner.getMonthlyHours(), planner.getWeekNumbers(), planner.getWorkload());
+        final var month = new Month(planner.getMonth(), planner.getMonthlyHours(), planner.getWeekNumbers(), planner.getWorkload());
 
 
         //Init prev
@@ -61,11 +67,10 @@ public class DistributorService {
                 final var possibleDayOfWeek = this.findDay(workingWeek, doctor);
 
                 for (LocalDate localDate : possibleDayOfWeek) {
-                    if (workingWeek.isOverhead(doctor.getId())) {
+                    if (workingWeek.isOverhead(doctor.getId()) || !workingWeek.hasWeekends(doctor.getId())) {
                         break;
                     }
-                    final var workingDay = workingWeek.getDay(localDate);
-                    final var activities = this.days(workingDay, doctor);
+                    final var activities = this.days(workingWeek, doctor);
                     for (final var modalityToHours : activities.entrySet()) {
                         final var availableHours =
                                 Math.min(
@@ -83,29 +88,49 @@ public class DistributorService {
                         }
                     }
                 }
-
-//                final var mainModality = doctor.getPerformances()
-//                workingWeek.getWorkloads().
             }
         }
 
-
-        for (final var doctor : planner.getDoctors()) {
-
-        }
-
-
-        return Map.of();
+        return this.mapMonth(month);
     }
 
-    public Map<String, Double> days(Day day, DoctorDto doctor) {
+    private Map<LocalDate, List<DoctorDayDto>> mapMonth(Month month) {
+        return month.getWeeks().values().stream().map(Week::getDays)
+                .map(Map::values)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toMap(Day::getDate, v -> this.map(v.getDoctors())));
+    }
+
+    private List<DoctorDayDto> map(Map<UUID, DoctorDay> doctors) {
+
+        return doctors.values().stream().map(doctorDay ->
+                        DoctorDayDto.builder()
+                                .id(doctorDay.getDoctorId())
+                                .tasks(
+                                        doctorDay.getModalityWorkload().entrySet().stream().map(entry -> {
+                                            final var modalityContainer = ModalityMapper.from(entry.getKey());
+                                            return TaskDayDto.builder()
+                                                    .modality(modalityContainer.modality())
+                                                    .typeModality(modalityContainer.typeModality())
+                                                    .hours(entry.getValue())
+                                                    .build();
+                                        }).toList()
+                                )
+                                .build())
+                .toList();
+    }
+
+    public Map<String, Double> days(Week week, DoctorDto doctor) {
         var hours = doctor.getHours();
         final var modalityPriority = new ArrayList<>(doctor.getModality());
 
         modalityPriority.addAll(doctor.getOptionalModality());
         final var result = new HashMap<String, Double>();
         for (String s : modalityPriority) {
-            final var load = day.getWorkloads().get(s);
+            final var load = week.getWorkloads().get(s);
+            if (load == null) {
+                continue;
+            }
             final var performance = doctor.getPerformances().get(s);
 
             if (load == 0) {
@@ -231,17 +256,11 @@ public class DistributorService {
 
         Week(LocalDate start, LocalDate end, List<WorkloadDto> workloads) {
             this.start = start;
-            final var mapWorkload = new HashMap<String, long[]>();
-            for (WorkloadDto workload : workloads) {
-                mapWorkload.put(workload.getModality(), splitNumber(workload.getValue(), 7));
-            }
-            int i = 0;
             do {
                 days.put(
                         start,
                         Day.builder()
                                 .date(start)
-                                .workloads(mapWorkload.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue()[i])))
                                 .build()
                 );
                 start = start.plusDays(1);
@@ -257,6 +276,10 @@ public class DistributorService {
                 }
             }
 
+        }
+
+        public boolean hasWeekends(UUID id) {
+            return this.days.values().stream().filter(day -> day.getDoctors().get(id) == null).count() > 2;
         }
 
         //  public boolean can
@@ -307,7 +330,7 @@ public class DistributorService {
             final var day = this.getDay(date);
             final var performance = Math.round(hours * doctor.getPerformances().get(modality));
             workloads.put(modality, workloads.get(modality) - performance);
-            day.addWork(doctor.getId(), modality, performance, hours);
+            day.addWork(doctor.getId(), modality, hours);
             this.addHours(doctor.getId(), hours);
         }
 
@@ -321,14 +344,12 @@ public class DistributorService {
     @Builder
     @AllArgsConstructor
     static class Day {
-        private  LocalDate date;
+        private LocalDate date;
         private final Map<UUID, DoctorDay> doctors = new HashMap<>();
-        private  Map<String, Long> workloads;
 
-        public void addWork(UUID doctorId, String modality, long performance, double hours) {
-            workloads.put(modality, workloads.get(modality) - performance);
+        public void addWork(UUID doctorId, String modality, double hours) {
             if (!doctors.containsKey(doctorId)) {
-                doctors.put(doctorId, DoctorDay.builder().build());
+                doctors.put(doctorId, DoctorDay.builder().doctorId(doctorId).build());
             }
             doctors.get(doctorId).addWork(modality, hours);
         }
@@ -337,7 +358,9 @@ public class DistributorService {
     @Getter
     @NoArgsConstructor
     @Builder
+    @AllArgsConstructor
     static class DoctorDay {
+        private UUID doctorId;
         //hours
         private final Map<String, Double> modalityWorkload = new HashMap<>();
 

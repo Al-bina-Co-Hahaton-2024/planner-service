@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "doctor_schedule")
+@Accessors(chain = true)
 public class DoctorScheduleEntity {
     @Id
     @Column(name = "id", nullable = false)

@@ -1,7 +1,6 @@
 package ru.albina.planner.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import ru.albina.planner.configuration.MapperConfiguration;
 import ru.albina.planner.dto.TypeModality;
 import ru.albina.planner.dto.medical.AbsenceSchedule;
@@ -35,7 +34,7 @@ public interface MedicalMapper {
 
 
     default Set<String> modality(Set<Modality> modality) {
-        return modality.stream().map(this::modality)
+        return Optional.ofNullable(modality).orElse(Set.of()).stream().map(this::modality)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
     }

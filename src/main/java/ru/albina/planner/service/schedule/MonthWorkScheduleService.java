@@ -20,7 +20,7 @@ public class MonthWorkScheduleService {
 
     @Transactional
     public List<WorkScheduleEntity> getAllAtMonth(LocalDate localDate) {
-        return  this.calendarService.getAllDaysAtMonth(localDate.atStartOfDay().toLocalDate())
+        return this.calendarService.getAllDaysAtMonth(localDate.withDayOfMonth(1))
                 .stream()
                 .map(this.workScheduleService::createOrGet)
                 .toList();

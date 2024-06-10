@@ -19,8 +19,9 @@ public class PlannerGeneratorService {
     private final PlannerScheduleService plannerScheduleService;
 
     public PlannerDto generateRequest(LocalDate templateDate) {
-        final var startDate = templateDate.atStartOfDay().toLocalDate();
+        final var startDate = templateDate.withDayOfMonth(1);
         return PlannerDto.builder()
+                .month(startDate)
                 .monthlyHours(this.referenceClient.getHours(startDate.getYear(), startDate.getMonthValue()))
                 .doctors(this.plannerDoctorService.generateDoctors())
                 .workload(this.plannerWorkloadService.generate(startDate))

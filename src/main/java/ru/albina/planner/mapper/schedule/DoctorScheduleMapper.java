@@ -11,7 +11,7 @@ import ru.albina.planner.dto.response.schedule.DoctorLoad;
 
 import java.util.Optional;
 
-@Mapper(config = MapperConfiguration.class)
+@Mapper(config = MapperConfiguration.class, uses = DoctorWorkMapper.class)
 public interface DoctorScheduleMapper {
 
 

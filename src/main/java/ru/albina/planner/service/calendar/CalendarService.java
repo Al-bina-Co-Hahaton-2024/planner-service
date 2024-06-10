@@ -12,7 +12,7 @@ import java.util.Set;
 public class CalendarService {
 
     public Set<LocalDate> getAllDaysAtMonth(LocalDate localDate) {
-        var current = localDate.atStartOfDay().toLocalDate();
+        var current = localDate.withDayOfMonth(1);
         final var result = new HashSet<LocalDate>();
         do {
             result.add(current);

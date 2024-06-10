@@ -3,6 +3,7 @@ package ru.albina.planner.dto.response.schedule;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -18,5 +19,7 @@ public class DoctorLoad {
     private Double takenHours;
 
     private Double takenExtraHours;
+
+    private List<DoctorWork> doctorWorks;
 
 }
