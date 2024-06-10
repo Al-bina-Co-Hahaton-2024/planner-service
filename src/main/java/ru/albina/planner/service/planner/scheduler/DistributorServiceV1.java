@@ -65,7 +65,7 @@ public class DistributorServiceV1 implements DistributorService {
                 }
                 final var workingWeek = month.getWeek(week.getWeekNumber());
                 final var possibleDayOfWeek = this.findDay(workingWeek, doctor);
-
+                log.info("Doctor {} can work at {}", doctor.getId(), possibleDayOfWeek);
                 for (LocalDate localDate : possibleDayOfWeek) {
                     if (workingWeek.isOverhead(doctor.getId()) || !workingWeek.hasWeekends(doctor.getId())) {
                         break;
@@ -176,7 +176,21 @@ public class DistributorServiceV1 implements DistributorService {
         return days.stream().map(DayOfWeek::of)
                 .map(dayOfWeek -> week.getStart().plusDays(dayOfWeek.getValue() - 1))
                 .filter(localDate -> !doctor.getAbsenceSchedules().contains(localDate))
+                .filter(localDate -> this.isAvailable(localDate, doctor))
                 .toList();
+    }
+
+    private boolean isAvailable(LocalDate localDate, DoctorDto doctorDto) {
+        final var startDate = Optional.ofNullable(doctorDto.getStartContract()).orElse(LocalDate.MAX);
+        final var endDate = Optional.ofNullable(doctorDto.getEndContract()).orElse(LocalDate.MAX);
+
+        return !localDate.isBefore(
+                startDate
+        ) && !localDate.isAfter(
+                endDate
+        ) && !localDate.isEqual(
+                endDate
+        );
     }
 
     @Getter
@@ -279,28 +293,22 @@ public class DistributorServiceV1 implements DistributorService {
         }
 
         public boolean hasWeekends(UUID id) {
-            return this.days.values().stream().filter(day -> day.getDoctors().get(id) == null).count() > 2;
-        }
+            final var weekendsDoctor = this.days.values().stream()
+                    .filter(day -> day.getDoctors().get(id) == null)
+                    .map(Day::getDate)
+                    .sorted()
+                    .toList();
+            for (int i = 0; i < weekendsDoctor.size() - 2; i++) {
+                final var date1 = weekendsDoctor.get(i);
+                final var date2 = weekendsDoctor.get(i + 1);
+                final var date3 = weekendsDoctor.get(i + 2);
 
-        //  public boolean can
-
-        public static long[] splitNumber(long number, int parts) {
-            long[] result = new long[parts];
-
-            // Заполняем массив
-            long base = number / parts;
-            long remainder = number % parts;
-
-            for (int i = 0; i < parts; i++) {
-                result[i] = base;
-                if (i < remainder) {
-                    result[i]++;
+                if (date2.equals(date1.plusDays(1)) && date3.equals(date2.plusDays(1))) {
+                    return true;
                 }
             }
-
-            return result;
+            return false;
         }
-
 
         public Day getDay(LocalDate date) {
             return Objects.requireNonNull(this.days.get(date));

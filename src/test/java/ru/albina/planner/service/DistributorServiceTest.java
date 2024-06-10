@@ -7,11 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.albina.planner.DistributorHelper;
 import ru.albina.planner.dto.planner.DoctorDto;
 import ru.albina.planner.dto.planner.PlannerDto;
 import ru.albina.planner.dto.planner.WorkloadDto;
 import ru.albina.planner.dto.reference.WeekNumberResult;
-import ru.albina.planner.service.planner.scheduler.DistributorService;
+import ru.albina.planner.service.planner.scheduler.DistributorServiceV1;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,11 +20,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @ExtendWith(MockitoExtension.class)
 class DistributorServiceTest {
 
     @InjectMocks
-    private DistributorService distributorService;
+    private DistributorServiceV1 distributorService;
 
 
     @Test
@@ -49,7 +52,7 @@ class DistributorServiceTest {
         final var doctor = UUID.randomUUID();
         final var plan = this.distributorService.distributeDoctors(
                 PlannerDto.builder()
-                        .month(LocalDate.of(2023, 6,1))
+                        .month(LocalDate.of(2023, 6, 1))
                         .doctors(
                                 List.of(
                                         DoctorDto.builder()
@@ -59,6 +62,7 @@ class DistributorServiceTest {
                                                 .modality(Set.of("DENSITOMETER"))
                                                 .optionalModality(Set.of("FLG"))
                                                 .workDays(List.of(4, 7))
+                                                .startContract(LocalDate.of(2023, 5, 1))
                                                 .absenceSchedules(List.of(
                                                         LocalDate.of(2024, 6, 6),
                                                         LocalDate.of(2024, 6, 7),
@@ -130,13 +134,13 @@ class DistributorServiceTest {
                                 List.of(
                                         WeekNumberResult.builder()
                                                 .weekNumber(1)
-                                                .startDate(LocalDate.of(2023, 6,1))
-                                                .endDate(LocalDate.of(2023, 6,7))
+                                                .startDate(LocalDate.of(2023, 6, 1))
+                                                .endDate(LocalDate.of(2023, 6, 7))
                                                 .build(),
                                         WeekNumberResult.builder()
                                                 .weekNumber(2)
-                                                .startDate(LocalDate.of(2023, 6,8))
-                                                .endDate(LocalDate.of(2023, 6,14))
+                                                .startDate(LocalDate.of(2023, 6, 8))
+                                                .endDate(LocalDate.of(2023, 6, 14))
                                                 .build()
                                 )
                         )
@@ -145,9 +149,65 @@ class DistributorServiceTest {
 
                                 )
                         )
-                .build());
+                        .build());
 
         // assertThat(plan.get(LocalDate.of(2023,6,18)))
 
+    }
+
+    @Test
+    void shouldIgnoreDoctorWhenStartContractIsNotReady() {
+        final var doctor = DistributorHelper.generateDoctor();
+        final var plan = this.distributorService.distributeDoctors(
+                PlannerDto.builder()
+                        .monthlyHours(100d)
+                        .doctors(List.of(doctor.setStartContract(LocalDate.now().plusMonths(2))))
+                        .month(LocalDate.now())
+                        .weekNumbers(DistributorHelper.weekNumberResults(LocalDate.now(), 4))
+                        .workload(DistributorHelper.generateWorkload(4))
+                        .schedule(List.of())
+                        .build()
+        );
+
+        assertThat(plan.values()).allMatch(List::isEmpty);
+    }
+
+
+    @Test
+    void shouldDoDoctorWhenStartContractIsReady() {
+        final var doctor = DistributorHelper.generateDoctor();
+        final var plan = this.distributorService.distributeDoctors(
+                PlannerDto.builder()
+                        .monthlyHours(100d)
+                        .doctors(List.of(doctor.setStartContract(LocalDate.now())))
+                        .month(LocalDate.now())
+                        .weekNumbers(DistributorHelper.weekNumberResults(LocalDate.now(), 4))
+                        .workload(DistributorHelper.generateWorkload(4))
+                        .schedule(List.of())
+                        .build()
+        );
+
+        assertThat(plan.values()).anyMatch(v -> !v.isEmpty());
+    }
+
+
+    @Test
+    void shouldIgnoreDoctorWhenEndContractIsAlreadyReady() {
+        final var doctor = DistributorHelper.generateDoctor();
+        final var plan = this.distributorService.distributeDoctors(
+                PlannerDto.builder()
+                        .monthlyHours(100d)
+                        .doctors(List.of(doctor
+                                .setStartContract(LocalDate.now().minusDays(10))
+                                .setEndContract(LocalDate.now())
+                        ))
+                        .month(LocalDate.now())
+                        .weekNumbers(DistributorHelper.weekNumberResults(LocalDate.now(), 4))
+                        .workload(DistributorHelper.generateWorkload(4))
+                        .schedule(List.of())
+                        .build()
+        );
+
+        assertThat(plan.values()).allMatch(List::isEmpty);
     }
 }
