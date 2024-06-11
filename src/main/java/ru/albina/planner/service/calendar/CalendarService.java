@@ -20,4 +20,21 @@ public class CalendarService {
         } while (current.getMonthValue() == localDate.getMonthValue());
         return result;
     }
+
+
+    public Set<LocalDate> getAllDaysAtStartToEnd(LocalDate startDate, LocalDate endDate) {
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("Start date cannot be after end date");
+        }
+        final var result = new HashSet<LocalDate>();
+        do {
+            result.add(startDate);
+            startDate = startDate.plusDays(1);
+        } while (
+                startDate.getDayOfMonth() == endDate.getDayOfMonth() &&
+                        startDate.getYear() == endDate.getYear() &&
+                        startDate.getMonthValue() == endDate.getMonthValue()
+        );
+        return result;
+    }
 }

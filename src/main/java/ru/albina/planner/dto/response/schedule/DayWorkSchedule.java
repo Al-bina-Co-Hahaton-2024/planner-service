@@ -16,5 +16,7 @@ public class DayWorkSchedule {
 
     private boolean isActual;
 
+    private Integer weekNumber;
+
     private List<DoctorLoad> doctors;
 }

@@ -53,6 +53,17 @@ public class ReferenceClient {
                 .block();
     }
 
+    public WeekNumberResult getWeek(int year, int week) {
+        return this.webClient.get()
+                .uri(uriBuilder -> uriBuilder.path(WebConstants.FULL_PRIVATE + "/week-numbers/")
+                        .queryParam("year", year)
+                        .queryParam("week", week)
+                        .build())
+                .retrieve()
+                .bodyToMono(WeekNumberResult.class)
+                .block();
+    }
+
     public List<WeekNumberResult> getWeeks(Collection<LocalDate> localDates) {
         return this.webClient.get()
                 .uri(uriBuilder -> uriBuilder.path(WebConstants.FULL_PRIVATE + "/week-numbers").queryParam("dates", localDates).build())

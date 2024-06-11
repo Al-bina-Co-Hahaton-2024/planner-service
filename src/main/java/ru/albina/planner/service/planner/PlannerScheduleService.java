@@ -63,16 +63,14 @@ public class PlannerScheduleService {
                                 .extraHours(doctor.getManualExtraHours())
                                 .forceSchedule(doctor.getForceSchedule())
                                 .tasks(
-                                        date.isBefore(now) ?
-                                                doctor.getDoctorWorks().stream().map(
-                                                        work ->
-                                                                TaskDto.builder()
-                                                                        .extraHours(work.getUsedExtraHours())
-                                                                        .hours(work.getUsedHours())
-                                                                        .modality(ModalityMapper.to(work.getModality(), work.getTypeModality()))
-                                                                        .build()
-                                                ).toList()
-                                                : Collections.emptyList()
+                                        date.isAfter(now) && !doctor.getForceSchedule() ? Collections.emptyList() : doctor.getDoctorWorks().stream().map(
+                                                work ->
+                                                        TaskDto.builder()
+                                                                .extraHours(work.getUsedExtraHours())
+                                                                .hours(work.getUsedHours())
+                                                                .modality(ModalityMapper.to(work.getModality(), work.getTypeModality()))
+                                                                .build()
+                                        ).toList()
                                 )
                                 .build()
                 );
