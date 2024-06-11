@@ -1,6 +1,7 @@
 package ru.albina.planner.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.albina.planner.client.MedicalClient;
@@ -21,6 +22,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AnalysisService {
@@ -58,10 +60,14 @@ public class AnalysisService {
                             .orElse(0);
 
 
+                    log.info("{} - {}", doctorSchedule.getDoctorId(), doctorPerformance);
+
                     final var key = ModalityMapper.to(work.getModality(), work.getTypeModality());
                     final var hours = work.getUsedHours() + work.getUsedExtraHours();
                     final long score = (long) (doctorPerformance * hours);
 
+
+                    log.info("{} ", score);
 
                     if (modalityResults.containsKey(key)) {
                         modalityResults.put(key, modalityResults.get(key) + score);
