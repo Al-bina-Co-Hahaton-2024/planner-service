@@ -13,6 +13,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+    show-sql: true
 server:
   port: ${SERVER_HTTP_PORT:8084}
 springdoc:
