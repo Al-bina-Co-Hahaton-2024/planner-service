@@ -17,7 +17,6 @@ public class AnalysisPerWeekDto {
 
     private boolean isActual;
 
-
     private int year;
 
     private int weekNumber;

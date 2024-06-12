@@ -3,14 +3,13 @@ package ru.albina.planner.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 import ru.albina.planner.DistributorHelper;
 import ru.albina.planner.dto.planner.*;
 import ru.albina.planner.dto.reference.WeekNumberResult;
 import ru.albina.planner.dto.response.data.DoctorDayDto;
+import ru.albina.planner.service.planner.PerformanceService;
 import ru.albina.planner.service.planner.scheduler.DistributorServiceV1;
 
 import java.time.LocalDate;
@@ -21,11 +20,14 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(MockitoExtension.class)
 class DistributorServiceTest {
 
-    @InjectMocks
     private DistributorServiceV1 distributorService;
+
+    @BeforeEach
+    void before() {
+        this.distributorService = new DistributorServiceV1(new PerformanceService());
+    }
 
 
     @Test

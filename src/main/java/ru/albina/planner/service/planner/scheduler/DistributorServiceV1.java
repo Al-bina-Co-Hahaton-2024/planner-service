@@ -8,10 +8,8 @@ import ru.albina.planner.dto.reference.WeekNumberResult;
 import ru.albina.planner.dto.response.data.DoctorDayDto;
 import ru.albina.planner.dto.response.data.TaskDayDto;
 import ru.albina.planner.mapper.ModalityMapper;
+import ru.albina.planner.service.planner.PerformanceService;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
@@ -24,6 +22,7 @@ import java.util.stream.IntStream;
 @RequiredArgsConstructor
 public class DistributorServiceV1 implements DistributorService {
 
+    private final PerformanceService performanceService;
     /*
     Правила
         В неделе 40 часов
@@ -165,7 +164,7 @@ public class DistributorServiceV1 implements DistributorService {
             if (load <= 0) {
                 continue;
             }
-            final var hR = Math.min(hours, this.hours(load, performance, hours));
+            final var hR = Math.min(hours, this.performanceService.delegatePerformance(load, performance, hours));
 
             hours -= hR;
             result.put(s, hR);
@@ -177,20 +176,7 @@ public class DistributorServiceV1 implements DistributorService {
         return result;
     }
 
-    public Double hours(long load, long performance, double maxHours) {
-        var hours = 0d;
-        //Not quite perform
-        while (load > 0 && hours <= maxHours) {
-            if (load >= performance) {
-                hours++;
-            } else {
-                hours += new BigDecimal(1 / 5d, new MathContext(1, RoundingMode.HALF_DOWN)).doubleValue();
-            }
-            load -= performance;
-        }
 
-        return hours;
-    }
 
     public List<LocalDate> findDay(Week week, DoctorDto doctor) {
         final var all = IntStream.range(1, 8).boxed().toList();

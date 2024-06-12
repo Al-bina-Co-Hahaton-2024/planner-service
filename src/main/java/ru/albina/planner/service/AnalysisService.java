@@ -14,6 +14,7 @@ import ru.albina.planner.dto.response.analysis.AnalysisPerWeekDto;
 import ru.albina.planner.dto.response.analysis.AnalysisWorkload;
 import ru.albina.planner.mapper.ModalityMapper;
 import ru.albina.planner.service.calendar.CalendarService;
+import ru.albina.planner.service.planner.PerformanceService;
 import ru.albina.planner.service.schedule.WorkScheduleService;
 
 import java.util.*;
@@ -33,8 +34,11 @@ public class AnalysisService {
 
     private final WorkScheduleService workScheduleService;
 
+    private final PerformanceService performanceService;
+
     private AnalysisPerWeekDto getWeekAnalysis(Map<UUID, Doctor> doctors, int year, int week) {
         final var weekNumberResult = this.referenceClient.getWeek(year, week);
+        final var averagePerformance = this.medicalClient.getAveragePerformances();
         final var schedules = this.workScheduleService.createOrGet(
                 this.calendarService.getAllDaysAtStartToEnd(weekNumberResult.getStartDate(), weekNumberResult.getEndDate())
         );
@@ -74,13 +78,25 @@ public class AnalysisService {
                                 .weeks(Set.of(week))
                                 .build()
                 )
-        ).stream().map(workload ->
-                AnalysisWorkload.builder()
-                        .modality(workload.getModality())
-                        .typeModality(workload.getTypeModality())
-                        .workload(Optional.ofNullable(workload.getManualValue()).orElse(workload.getGeneratedValue()))
-                        .work(modalityResults.get(ModalityMapper.to(workload.getModality(), workload.getTypeModality())))
-                        .build()
+        ).stream().map(workload -> {
+                    final var workloadValue = Optional.ofNullable(workload.getManualValue()).orElse(workload.getGeneratedValue());
+                    final var work = modalityResults.get(ModalityMapper.to(workload.getModality(), workload.getTypeModality()));
+
+                    final var average = averagePerformance.stream()
+                            .filter(performance ->
+                                    performance.getTypeModality().equals(workload.getTypeModality()) && performance.getModality().equals(workload.getModality())
+                            )
+                            .map(Performance::getValue)
+                            .findFirst().orElse(0);
+
+                    return AnalysisWorkload.builder()
+                            .modality(workload.getModality())
+                            .typeModality(workload.getTypeModality())
+                            .workload(workloadValue)
+                            .work(work)
+                            .hoursNeed(this.performanceService.delegatePerformance(workloadValue - work, average, Double.MAX_VALUE))
+                            .build();
+                }
         ).toList();
 
 

@@ -20,4 +20,6 @@ public class AnalysisWorkload {
     private Long workload;
 
     private Long work;
+
+    private Double hoursNeed;
 }
