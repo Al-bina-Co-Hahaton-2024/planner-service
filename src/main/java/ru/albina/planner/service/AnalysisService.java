@@ -80,7 +80,7 @@ public class AnalysisService {
                 )
         ).stream().map(workload -> {
                     final var workloadValue = Optional.ofNullable(workload.getManualValue()).orElse(workload.getGeneratedValue());
-                    final var work = modalityResults.get(ModalityMapper.to(workload.getModality(), workload.getTypeModality()));
+                    final var work = modalityResults.getOrDefault(ModalityMapper.to(workload.getModality(), workload.getTypeModality()), 0L);
 
                     final var average = averagePerformance.stream()
                             .filter(performance ->
