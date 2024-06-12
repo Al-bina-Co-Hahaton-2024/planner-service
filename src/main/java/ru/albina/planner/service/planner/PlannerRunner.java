@@ -1,6 +1,8 @@
 package ru.albina.planner.service.planner;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.albina.planner.domain.DoctorScheduleEntity;
 import ru.albina.planner.domain.DoctorWorkEntity;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PlannerRunner {
 
+    private static final Logger log = LoggerFactory.getLogger(PlannerRunner.class);
     private final PlannerGeneratorService plannerGeneratorService;
     private final DistributorService distributorService;
 
@@ -33,6 +36,7 @@ public class PlannerRunner {
         calendar.entrySet().parallelStream().forEach(entry -> {
             final var localDate = entry.getKey();
             final var doctorDayDtos = entry.getValue();
+            log.info("I am {}-{} for {}", Thread.currentThread().getName(), Thread.currentThread().getId(), localDate);
             final var day = this.workScheduleService.createOrGet(localDate);
             this.update(day, day.getDoctorSchedules(), doctorDayDtos);
             day.setIsActual(true);
