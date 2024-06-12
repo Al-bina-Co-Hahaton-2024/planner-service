@@ -24,4 +24,13 @@ public class MonthWorkScheduleService {
 
         return this.workScheduleService.createOrGet(data);
     }
+
+
+    @Transactional
+    public List<WorkScheduleEntity> getAllAtMonthWithProductionWeek(LocalDate localDate) {
+
+        final var data = this.calendarService.getAllDaysForMonthWithProductionWeek(localDate);
+
+        return this.workScheduleService.createOrGet(data);
+    }
 }

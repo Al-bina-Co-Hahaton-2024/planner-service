@@ -2,6 +2,7 @@ package ru.albina.planner.service.calendar;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.albina.planner.client.ReferenceClient;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -10,6 +11,8 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class CalendarService {
+
+    private final ReferenceClient referenceClient;
 
     public Set<LocalDate> getAllDaysAtMonth(LocalDate localDate) {
         var current = localDate.withDayOfMonth(1);
@@ -34,5 +37,19 @@ public class CalendarService {
                 startDate.isBefore(endDate) || startDate.isEqual(endDate)
         );
         return result;
+    }
+
+
+    public LocalDate getLastDayOfMonth(LocalDate localDate) {
+        return localDate.withDayOfMonth(localDate.getMonth().length(localDate.isLeapYear()));
+    }
+
+
+    public Set<LocalDate> getAllDaysForMonthWithProductionWeek(LocalDate localDate) {
+
+        return this.getAllDaysAtStartToEnd(
+                this.referenceClient.getWeek(localDate.withDayOfMonth(1)).getStartDate(),
+                this.referenceClient.getWeek(this.getLastDayOfMonth(localDate)).getEndDate()
+        );
     }
 }

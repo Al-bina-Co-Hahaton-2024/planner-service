@@ -25,6 +25,13 @@ public class WorkScheduleUserService {
     }
 
     @Transactional
+    public List<DayWorkSchedule> getDayWorkSchedulesWithProduction(LocalDate scheduleDate) {
+        return this.monthWorkScheduleService.getAllAtMonthWithProductionWeek(scheduleDate).stream()
+                .map(this.dayWorkScheduleMapper::to)
+                .toList();
+    }
+
+    @Transactional
     public List<DayWorkSchedule> getDayWorkSchedulesForDoctor(LocalDate scheduleDate, UUID doctorId) {
         return this.getDayWorkSchedules(scheduleDate).stream()
                 .map(val ->

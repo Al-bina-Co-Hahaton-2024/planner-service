@@ -60,10 +60,8 @@ public class AnalyzesController {
     //TODO @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping("/find")
     public List<AnalysisPerWeekDto> perWeek(
-            @RequestBody List<AnalysisPerWeekRequest> requestList
+            @RequestBody List<AnalysisPerWeekRequest> requests
     ) {
-        return requestList.stream().map(
-                request -> this.analysisService.getWeekAnalysis(request.getYear(), request.getWeek())
-        ).toList();
+        return this.analysisService.getWeekAnalysis(requests);
     }
 }

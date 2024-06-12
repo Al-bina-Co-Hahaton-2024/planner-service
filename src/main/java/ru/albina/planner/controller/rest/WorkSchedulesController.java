@@ -44,7 +44,7 @@ public class WorkSchedulesController {
     public List<DayWorkSchedule> getWorkSchedules(
             @RequestParam("date") LocalDate workScheduleDate
     ) {
-        return this.workScheduleUserService.getDayWorkSchedules(workScheduleDate);
+        return this.workScheduleUserService.getDayWorkSchedulesWithProduction(workScheduleDate);
     }
 
     @Operation(

@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import ru.albina.planner.domain.DoctorScheduleEntity;
 import ru.albina.planner.domain.DoctorWorkEntity;
 import ru.albina.planner.domain.WorkScheduleEntity;
@@ -33,15 +36,21 @@ public class PlannerRunner {
         final var result = this.plannerGeneratorService.generateRequest(date);
         final var calendar = this.distributorService.distributeDoctors(result);
 
-        calendar.entrySet().parallelStream().forEach(entry -> {
+        final var monoList = calendar.entrySet().stream().map(entry -> {
             final var localDate = entry.getKey();
             final var doctorDayDtos = entry.getValue();
-            log.info("I am {}-{} for {}", Thread.currentThread().getName(), Thread.currentThread().getId(), localDate);
-            final var day = this.workScheduleService.createOrGet(localDate);
-            this.update(day, day.getDoctorSchedules(), doctorDayDtos);
-            day.setIsActual(true);
-            this.workScheduleService.save(day);
-        });
+            return Mono.fromRunnable(() -> {
+                log.info("I am {}-{} for {}", Thread.currentThread().getName(), Thread.currentThread().getId(), localDate);
+                final var day = this.workScheduleService.createOrGet(localDate);
+                this.update(day, day.getDoctorSchedules(), doctorDayDtos);
+                day.setIsActual(true);
+                this.workScheduleService.save(day);
+            });
+        }).toList();
+
+        Flux.fromIterable(monoList)
+                .flatMap(mono -> mono.subscribeOn(Schedulers.boundedElastic()))
+                .collectList().block();
     }
 
     private void update(WorkScheduleEntity day, List<DoctorScheduleEntity> doctors, List<DoctorDayDto> doctorDay) {
