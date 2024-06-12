@@ -129,7 +129,7 @@ public class DistributorServiceV1 implements DistributorService {
 
         modalityPriority.addAll(doctor.getOptionalModality());
         final var result = new HashMap<String, Double>();
-        for (String s : modalityPriority) {
+        for (String s : modalityPriority.stream().distinct().toList()) {
             final var load = week.getWorkloads().get(s);
             if (load == null) {
                 continue;
