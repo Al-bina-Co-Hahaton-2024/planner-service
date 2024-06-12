@@ -86,6 +86,8 @@ public class AnalysisService {
 
         return AnalysisPerWeekDto.builder()
                 .isActual(isActual)
+                .weekNumber(week)
+                .year(year)
                 .workloads(analyzes)
                 .build();
     }

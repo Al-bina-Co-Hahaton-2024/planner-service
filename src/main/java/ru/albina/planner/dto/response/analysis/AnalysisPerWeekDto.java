@@ -16,4 +16,9 @@ public class AnalysisPerWeekDto {
     private List<AnalysisWorkload> workloads;
 
     private boolean isActual;
+
+
+    private int year;
+
+    private int weekNumber;
 }
