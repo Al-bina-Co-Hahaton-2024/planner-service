@@ -2,7 +2,6 @@ package ru.albina.planner.service.planner;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.albina.planner.domain.DoctorScheduleEntity;
 import ru.albina.planner.domain.DoctorWorkEntity;
 import ru.albina.planner.domain.WorkScheduleEntity;
@@ -26,12 +25,14 @@ public class PlannerRunner {
 
     private final WorkScheduleService workScheduleService;
 
-    @Transactional
+
     public void run(LocalDate date) {
         final var result = this.plannerGeneratorService.generateRequest(date);
         final var calendar = this.distributorService.distributeDoctors(result);
 
-        calendar.forEach((localDate, doctorDayDtos) -> {
+        calendar.entrySet().parallelStream().forEach(entry -> {
+            final var localDate = entry.getKey();
+            final var doctorDayDtos = entry.getValue();
             final var day = this.workScheduleService.createOrGet(localDate);
             this.update(day, day.getDoctorSchedules(), doctorDayDtos);
             day.setIsActual(true);
