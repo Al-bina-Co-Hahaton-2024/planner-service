@@ -70,7 +70,7 @@ public class DistributorServiceV1 implements DistributorService {
                     if (workingWeek.isOverhead(doctor.getId())) {
                         break;
                     }
-                    if (!workingWeek.willBeHasWeekends(doctor.getId(), localDate)){
+                    if (!workingWeek.willBeHasWeekends(doctor.getId(), localDate)) {
                         continue;
                     }
                     final var activities = this.days(workingWeek, doctor);
@@ -338,7 +338,7 @@ public class DistributorServiceV1 implements DistributorService {
 
         public void addWork(DoctorDto doctor, LocalDate date, String modality, Double hours) {
             final var day = this.getDay(date);
-            final var performance = Math.round(hours * doctor.getPerformances().get(modality));
+            final var performance = (long) Math.ceil(hours * doctor.getPerformances().get(modality));
             workloads.put(modality, workloads.get(modality) - performance);
             day.addWork(doctor.getId(), modality, hours);
             this.addHours(doctor.getId(), hours);
