@@ -35,8 +35,8 @@ public class WorkScheduleUserService {
     public List<DayWorkSchedule> getDayWorkSchedulesForDoctor(LocalDate scheduleDate, UUID doctorId) {
         return this.getDayWorkSchedules(scheduleDate).stream()
                 .map(val ->
-                        val.setDoctors(
-                                val.getDoctors().stream()
+                        val.setDoctorSchedules(
+                                val.getDoctorSchedules().stream()
                                         .filter(doctorLoad -> doctorLoad.getDoctorId().equals(doctorId))
                                         .toList()
                         )

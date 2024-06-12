@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DoctorSchedulerEditRequest {
+public class DoctorSchedulesEditRequest {
 
     private Double extraHours;
 }

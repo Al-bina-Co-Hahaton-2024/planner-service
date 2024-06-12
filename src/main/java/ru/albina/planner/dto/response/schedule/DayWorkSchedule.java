@@ -21,5 +21,5 @@ public class DayWorkSchedule {
 
     private Integer weekNumber;
 
-    private List<DoctorLoad> doctorSchedulers;
+    private List<DoctorLoad> doctorSchedules;
 }

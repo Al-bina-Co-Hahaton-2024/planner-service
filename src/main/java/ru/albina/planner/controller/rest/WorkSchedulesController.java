@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.albina.backlib.configuration.WebConstants;
 import ru.albina.backlib.configuration.auto.OpenApiConfiguration;
 import ru.albina.backlib.model.security.LibPrincipal;
-import ru.albina.planner.dto.request.DoctorSchedulerEditRequest;
+import ru.albina.planner.dto.request.DoctorSchedulesEditRequest;
 import ru.albina.planner.dto.request.WorkSchedulesRequest;
 import ru.albina.planner.dto.response.schedule.DayWorkSchedule;
 import ru.albina.planner.service.planner.PlannerRunner;
@@ -63,17 +63,17 @@ public class WorkSchedulesController {
             }
     )
     //TODO @PreAuthorize("hasAnyRole('ADMIN')")
-    @PatchMapping("/{id-work-scheduler}/doctor-schedulers/{id-doctor-scheduler}/extra-hours")
+    @PatchMapping("/{id-work-scheduler}/doctor-schedules/{id-doctor-scheduler}/extra-hours")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void editExtraHours(
             @PathVariable("id-work-scheduler") UUID workSchedulerId,
             @PathVariable("id-doctor-scheduler") UUID doctorSchedulerId,
-            @RequestBody DoctorSchedulerEditRequest doctorSchedulerEditRequest
+            @RequestBody DoctorSchedulesEditRequest doctorSchedulesEditRequest
     ) {
         this.workScheduleEditService.extraHours(
                 workSchedulerId,
                 doctorSchedulerId,
-                doctorSchedulerEditRequest.getExtraHours()
+                doctorSchedulesEditRequest.getExtraHours()
         );
     }
 
