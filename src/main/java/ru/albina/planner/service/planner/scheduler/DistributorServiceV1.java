@@ -65,10 +65,13 @@ public class DistributorServiceV1 implements DistributorService {
                 }
                 final var workingWeek = month.getWeek(week.getWeekNumber());
                 final var possibleDayOfWeek = this.findDay(workingWeek, doctor);
-                log.info("Doctor {} can work at {}", doctor.getId(), possibleDayOfWeek);
+                //log.info("Doctor {} can work at {}", doctor.getId(), possibleDayOfWeek);
                 for (LocalDate localDate : possibleDayOfWeek) {
-                    if (workingWeek.isOverhead(doctor.getId()) || !workingWeek.hasWeekends(doctor.getId())) {
+                    if (workingWeek.isOverhead(doctor.getId())) {
                         break;
+                    }
+                    if (!workingWeek.willBeHasWeekends(doctor.getId(), localDate)){
+                        continue;
                     }
                     final var activities = this.days(workingWeek, doctor);
                     for (final var modalityToHours : activities.entrySet()) {
@@ -292,18 +295,17 @@ public class DistributorServiceV1 implements DistributorService {
 
         }
 
-        public boolean hasWeekends(UUID id) {
+        public boolean willBeHasWeekends(UUID id, LocalDate localDate) {
             final var weekendsDoctor = this.days.values().stream()
-                    .filter(day -> day.getDoctors().get(id) == null)
+                    .filter(day -> day.getDoctors().get(id) == null && !day.getDate().isEqual(localDate))
                     .map(Day::getDate)
                     .sorted()
                     .toList();
-            for (int i = 0; i < weekendsDoctor.size() - 2; i++) {
-                final var date1 = weekendsDoctor.get(i);
-                final var date2 = weekendsDoctor.get(i + 1);
-                final var date3 = weekendsDoctor.get(i + 2);
+            for (int i = 0; i < weekendsDoctor.size() - 1; i++) {
+                LocalDate date1 = weekendsDoctor.get(i);
+                LocalDate date2 = weekendsDoctor.get(i + 1);
 
-                if (date2.equals(date1.plusDays(1)) && date3.equals(date2.plusDays(1))) {
+                if (date1.plusDays(1).equals(date2)) {
                     return true;
                 }
             }
