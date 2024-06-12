@@ -14,6 +14,10 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 100
 server:
   port: ${SERVER_HTTP_PORT:8084}
 springdoc:

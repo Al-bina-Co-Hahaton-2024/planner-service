@@ -64,7 +64,7 @@ public class AnalysisService {
 
                     final var key = ModalityMapper.to(work.getModality(), work.getTypeModality());
                     final var hours = work.getUsedHours() + work.getUsedExtraHours();
-                    final long score = (long) (doctorPerformance * hours);
+                    final long score = (long) Math.ceil(doctorPerformance * hours);
 
 
                     log.info("{} ", score);

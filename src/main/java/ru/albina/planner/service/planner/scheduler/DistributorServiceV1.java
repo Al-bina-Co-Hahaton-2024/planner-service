@@ -133,7 +133,7 @@ public class DistributorServiceV1 implements DistributorService {
             }
             final var performance = doctor.getPerformances().get(s);
 
-            if (load == 0) {
+            if (load <= 0) {
                 continue;
             }
             final var hR = Math.min(hours, this.hours(load, performance, hours));

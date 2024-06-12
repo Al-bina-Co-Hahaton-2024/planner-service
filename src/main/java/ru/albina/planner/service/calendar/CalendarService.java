@@ -31,9 +31,7 @@ public class CalendarService {
             result.add(startDate);
             startDate = startDate.plusDays(1);
         } while (
-                startDate.getDayOfMonth() == endDate.getDayOfMonth() &&
-                        startDate.getYear() == endDate.getYear() &&
-                        startDate.getMonthValue() == endDate.getMonthValue()
+                startDate.isBefore(endDate) || startDate.isEqual(endDate)
         );
         return result;
     }
