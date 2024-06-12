@@ -71,7 +71,7 @@ public class PlannerRunner {
                         final var doctor = new DoctorScheduleEntity()
                                 .setId(UUID.randomUUID())
                                 .setDoctorId(updated.getId())
-                                .setManualExtraHours(0d)
+                                .setManualExtraHours(updated.getExtraHours())
                                 .setWorkSchedule(day);
                         doctors.add(doctor);
                         return doctor;

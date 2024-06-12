@@ -50,8 +50,14 @@ public class DistributorServiceV1 implements DistributorService {
             for (DoctorScheduleDto doctor : scheduleDto.getDoctors()) {
                 final var id = doctor.getId();
                 for (DayDto day : doctor.getDays()) {
+
+                    week.getDay(day.getDate()).setExtraHours(id, day.getExtraHours());
+
                     for (TaskDto task : day.getTasks()) {
                         month.addWork(doctors.get(id), week, day.getDate(), task.getModality(), task.getHours());
+                        if (Optional.ofNullable(task.getExtraHours()).orElse(0d) > 0d) {
+                            week.getDay(day.getDate()).addExtraWork(id, task.getModality(), task.getExtraHours());
+                        }
                     }
                 }
             }
@@ -59,11 +65,11 @@ public class DistributorServiceV1 implements DistributorService {
 
 
         for (final var week : planner.getWeekNumbers()) {
+            final var workingWeek = month.getWeek(week.getWeekNumber());
             for (final var doctor : planner.getDoctors()) {
                 if (month.isOverhead(doctor)) {
                     continue;
                 }
-                final var workingWeek = month.getWeek(week.getWeekNumber());
                 final var possibleDayOfWeek = this.findDay(workingWeek, doctor);
                 //log.info("Doctor {} can work at {}", doctor.getId(), possibleDayOfWeek);
                 for (LocalDate localDate : possibleDayOfWeek) {
@@ -73,7 +79,7 @@ public class DistributorServiceV1 implements DistributorService {
                     if (!workingWeek.willBeHasWeekends(doctor.getId(), localDate)) {
                         continue;
                     }
-                    final var activities = this.days(workingWeek, doctor);
+                    final var activities = this.days(workingWeek, doctor, doctor.getHours());
                     for (final var modalityToHours : activities.entrySet()) {
                         final var availableHours =
                                 Math.min(
@@ -92,9 +98,28 @@ public class DistributorServiceV1 implements DistributorService {
                     }
                 }
             }
+
+            this.shareExtraHours(workingWeek, doctors);
         }
 
         return this.mapMonth(month);
+    }
+
+    private void shareExtraHours(Week workingWeek, Map<UUID, DoctorDto> doctors) {
+        for (Day value : workingWeek.getDays().values()) {
+            final var extraHours = value.getExtraHours().entrySet().stream()
+                    .filter(entry -> entry.getValue() > 0d)
+                    .filter(entry -> doctors.containsKey(entry.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            for (final var extraHour : extraHours.entrySet()) {
+                final var doctor = doctors.get(extraHour.getKey());
+
+                this.days(workingWeek, doctor, extraHour.getValue()).forEach((modality, hours) -> {
+                    value.addExtraWork(doctor.getId(), modality, hours);
+                });
+            }
+        }
     }
 
     private Map<LocalDate, List<DoctorDayDto>> mapMonth(Month month) {
@@ -109,6 +134,7 @@ public class DistributorServiceV1 implements DistributorService {
         return doctors.values().stream().map(doctorDay ->
                         DoctorDayDto.builder()
                                 .id(doctorDay.getDoctorId())
+                                .extraHours(doctorDay.getExtraModalityWorkload().values().stream().reduce(Double::sum).orElse(0d))
                                 .tasks(
                                         doctorDay.getModalityWorkload().entrySet().stream().map(entry -> {
                                             final var modalityContainer = ModalityMapper.from(entry.getKey());
@@ -116,6 +142,7 @@ public class DistributorServiceV1 implements DistributorService {
                                                     .modality(modalityContainer.modality())
                                                     .typeModality(modalityContainer.typeModality())
                                                     .hours(entry.getValue())
+                                                    .extraHours(doctorDay.getExtraModalityWorkload().getOrDefault(entry.getKey(), 0d))
                                                     .build();
                                         }).toList()
                                 )
@@ -123,8 +150,7 @@ public class DistributorServiceV1 implements DistributorService {
                 .toList();
     }
 
-    public Map<String, Double> days(Week week, DoctorDto doctor) {
-        var hours = doctor.getHours();
+    public Map<String, Double> days(Week week, DoctorDto doctor, Double hours) {
         final var modalityPriority = new ArrayList<>(doctor.getModality());
 
         modalityPriority.addAll(doctor.getOptionalModality());
@@ -264,6 +290,7 @@ public class DistributorServiceV1 implements DistributorService {
     @NoArgsConstructor
     static class Week {
         private LocalDate start;
+
         private final Map<UUID, Double> hours = new HashMap<>();
 
         private final Map<LocalDate, Day> days = new HashMap<>();
@@ -297,8 +324,9 @@ public class DistributorServiceV1 implements DistributorService {
 
         public boolean willBeHasWeekends(UUID id, LocalDate localDate) {
             final var weekendsDoctor = this.days.values().stream()
-                    .filter(day -> day.getDoctors().get(id) == null && !day.getDate().isEqual(localDate))
+                    .filter(day -> day.getDoctors().get(id) == null || day.getDoctors().get(id).getModalityWorkload().isEmpty())
                     .map(Day::getDate)
+                    .filter(date -> !date.isEqual(localDate))
                     .sorted()
                     .toList();
             for (int i = 0; i < weekendsDoctor.size() - 1; i++) {
@@ -355,13 +383,46 @@ public class DistributorServiceV1 implements DistributorService {
     @AllArgsConstructor
     static class Day {
         private LocalDate date;
+        private final Map<UUID, Double> extraHours = new HashMap<>();
         private final Map<UUID, DoctorDay> doctors = new HashMap<>();
 
-        public void addWork(UUID doctorId, String modality, double hours) {
+        private DoctorDay initDay(UUID doctorId) {
+            DoctorDay day;
             if (!doctors.containsKey(doctorId)) {
-                doctors.put(doctorId, DoctorDay.builder().doctorId(doctorId).build());
+                day = DoctorDay.builder().doctorId(doctorId).build();
+                doctors.put(doctorId, day);
+            } else {
+                day = doctors.get(doctorId);
             }
-            doctors.get(doctorId).addWork(modality, hours);
+            return day;
+        }
+
+        public void addWork(UUID doctorId, String modality, double hours) {
+            this.initDay(doctorId).addWork(modality, hours);
+        }
+
+        public void setExtraHours(UUID doctorId, double hours) {
+            this.extraHours.put(doctorId, hours);
+        }
+
+        public void addExtraWork(UUID doctorId, String modality, double hours) {
+
+            var currentHours = this.extraHours.getOrDefault(doctorId, 0d);
+
+            // 5 - 10
+            // 5
+
+            // 5 - 4
+            // 1
+
+            if (currentHours < hours) {
+                this.initDay(doctorId).addExtraWork(modality, currentHours);
+                currentHours = 0d;
+            } else {
+                currentHours = currentHours - hours;
+                this.initDay(doctorId).addExtraWork(modality, hours);
+            }
+            this.extraHours.put(doctorId, currentHours);
         }
     }
 
@@ -375,11 +436,23 @@ public class DistributorServiceV1 implements DistributorService {
         private final Map<String, Double> modalityWorkload = new HashMap<>();
 
 
+        private final Map<String, Double> extraModalityWorkload = new HashMap<>();
+
+
         public void addWork(String modality, double hours) {
             if (modalityWorkload.containsKey(modality)) {
                 modalityWorkload.put(modality, modalityWorkload.get(modality) + hours);
             } else {
                 modalityWorkload.put(modality, hours);
+            }
+        }
+
+
+        public void addExtraWork(String modality, double hours) {
+            if (extraModalityWorkload.containsKey(modality)) {
+                extraModalityWorkload.put(modality, extraModalityWorkload.get(modality) + hours);
+            } else {
+                extraModalityWorkload.put(modality, hours);
             }
         }
     }

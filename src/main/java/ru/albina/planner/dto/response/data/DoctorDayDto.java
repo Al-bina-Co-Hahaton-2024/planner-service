@@ -15,5 +15,7 @@ import java.util.UUID;
 public class DoctorDayDto {
     private UUID id;
 
+    private Double extraHours;
+
     private List<TaskDayDto> tasks;
 }

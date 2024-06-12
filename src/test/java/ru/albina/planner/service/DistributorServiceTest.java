@@ -8,10 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.albina.planner.DistributorHelper;
-import ru.albina.planner.dto.planner.DoctorDto;
-import ru.albina.planner.dto.planner.PlannerDto;
-import ru.albina.planner.dto.planner.WorkloadDto;
+import ru.albina.planner.dto.planner.*;
 import ru.albina.planner.dto.reference.WeekNumberResult;
+import ru.albina.planner.dto.response.data.DoctorDayDto;
 import ru.albina.planner.service.planner.scheduler.DistributorServiceV1;
 
 import java.time.LocalDate;
@@ -209,5 +208,51 @@ class DistributorServiceTest {
         );
 
         assertThat(plan.values()).allMatch(List::isEmpty);
+    }
+
+    @Test
+    void shouldExtraHours() {
+        final var now = LocalDate.now();
+
+        final var doctor = DistributorHelper.generateDoctor();
+        final var plan = this.distributorService.distributeDoctors(
+                PlannerDto.builder()
+                        .monthlyHours(100d)
+                        .doctors(List.of(
+                                doctor
+                                        .setStartContract(now.minusDays(10))
+                                        .setEndContract(now)
+                        ))
+                        .month(LocalDate.now())
+                        .weekNumbers(DistributorHelper.weekNumberResults(now, 4))
+                        .workload(DistributorHelper.generateWorkload(4))
+                        .schedule(List.of(
+                                ScheduleDto.builder()
+                                        .weekNumber(1)
+                                        .doctors(
+                                                List.of(
+                                                        DoctorScheduleDto.builder()
+                                                                .id(doctor.getId())
+                                                                .days(
+                                                                        List.of(
+                                                                                DayDto.builder()
+                                                                                        .tasks(List.of())
+                                                                                        .date(now.plusDays(1))
+                                                                                        .extraHours(12d)
+                                                                                        .build()
+                                                                        )
+                                                                )
+                                                                .build()
+                                                )
+                                        )
+                                        .build()
+                        ))
+                        .build()
+        );
+
+        assertThat(plan.get(now.plusDays(1)))
+                .hasSize(1).first()
+                .extracting(DoctorDayDto::getExtraHours).isEqualTo(10d);
+
     }
 }
