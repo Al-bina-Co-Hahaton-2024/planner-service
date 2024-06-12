@@ -1,4 +1,4 @@
-package ru.albina.planner.service;
+package ru.albina.planner.service.analysis;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +60,7 @@ public class AnalysisService {
 
                     final var key = ModalityMapper.to(work.getModality(), work.getTypeModality());
                     final var hours = work.getUsedHours() + work.getUsedExtraHours();
-                    final long score = (long) Math.ceil(doctorPerformance * hours);
+                    final long score = this.performanceService.calculatePerformance(doctorPerformance, hours);
 
                     if (modalityResults.containsKey(key)) {
                         modalityResults.put(key, modalityResults.get(key) + score);

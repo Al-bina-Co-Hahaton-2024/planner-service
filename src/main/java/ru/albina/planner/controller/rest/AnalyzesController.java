@@ -13,7 +13,7 @@ import ru.albina.backlib.configuration.WebConstants;
 import ru.albina.backlib.configuration.auto.OpenApiConfiguration;
 import ru.albina.planner.dto.request.AnalysisPerWeekRequest;
 import ru.albina.planner.dto.response.analysis.AnalysisPerWeekDto;
-import ru.albina.planner.service.AnalysisService;
+import ru.albina.planner.service.analysis.AnalysisService;
 
 import java.util.List;
 

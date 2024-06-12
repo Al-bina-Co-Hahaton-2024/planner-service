@@ -33,4 +33,8 @@ public class PerformanceService {
 
         return hours;
     }
+
+    public long calculatePerformance(long performance, double hours) {
+        return (long) Math.ceil(performance * hours);
+    }
 }

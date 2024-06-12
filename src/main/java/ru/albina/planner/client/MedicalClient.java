@@ -11,6 +11,7 @@ import ru.albina.planner.dto.medical.Performance;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static ru.albina.planner.configuration.CacheConfiguration.REFERENCE_CACHE_NAME;
 
@@ -38,6 +39,15 @@ public class MedicalClient {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<Doctor>>() {
                 })
+                .block();
+    }
+
+
+    public Doctor getDoctor(UUID doctorId) {
+        return this.webClient.get()
+                .uri(uriBuilder -> uriBuilder.path(WebConstants.FULL_PRIVATE + "/doctors/{id}").build(doctorId))
+                .retrieve()
+                .bodyToMono(Doctor.class)
                 .block();
     }
 
