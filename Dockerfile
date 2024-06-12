@@ -1,4 +1,5 @@
 FROM gradle:8.3-jdk17 AS build
+LABEL org.opencontainers.image.description="test"
 ARG GITHUB_TOKEN
 MAINTAINER Alexander <BigTows> Chapchuk
 COPY --chown=gradle:gradle . /home/gradle/project
