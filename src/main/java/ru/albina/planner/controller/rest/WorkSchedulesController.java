@@ -10,19 +10,24 @@ import org.springframework.web.bind.annotation.*;
 import ru.albina.backlib.configuration.WebConstants;
 import ru.albina.backlib.configuration.auto.OpenApiConfiguration;
 import ru.albina.backlib.model.security.LibPrincipal;
+import ru.albina.planner.dto.request.DoctorSchedulerEditRequest;
 import ru.albina.planner.dto.request.WorkSchedulesRequest;
 import ru.albina.planner.dto.response.schedule.DayWorkSchedule;
 import ru.albina.planner.service.planner.PlannerRunner;
+import ru.albina.planner.service.schedule.WorkScheduleEditService;
 import ru.albina.planner.service.schedule.WorkScheduleUserService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
 @RequestMapping(WebConstants.FULL_WEB + "/work-schedules")
 @RequiredArgsConstructor
 public class WorkSchedulesController {
+
+    private final WorkScheduleEditService workScheduleEditService;
 
     private final WorkScheduleUserService workScheduleUserService;
 
@@ -45,6 +50,31 @@ public class WorkSchedulesController {
             @RequestParam("date") LocalDate workScheduleDate
     ) {
         return this.workScheduleUserService.getDayWorkSchedulesWithProduction(workScheduleDate);
+    }
+
+    @Operation(
+            summary = "Изменить дополнительные часы для графика",
+            security = @SecurityRequirement(name = OpenApiConfiguration.JWT),
+            responses = {
+                    @ApiResponse(
+                            description = "ОК",
+                            responseCode = "200"
+                    )
+            }
+    )
+    //TODO @PreAuthorize("hasAnyRole('ADMIN')")
+    @PatchMapping("/{id-work-scheduler}/doctor-schedulers/{id-doctor-scheduler}/extra-hours")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void editExtraHours(
+            @PathVariable("id-work-scheduler") UUID workSchedulerId,
+            @PathVariable("id-doctor-scheduler") UUID doctorSchedulerId,
+            @RequestBody DoctorSchedulerEditRequest doctorSchedulerEditRequest
+    ) {
+        this.workScheduleEditService.extraHours(
+                workSchedulerId,
+                doctorSchedulerId,
+                doctorSchedulerEditRequest.getExtraHours()
+        );
     }
 
     @Operation(

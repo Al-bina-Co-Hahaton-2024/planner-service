@@ -10,6 +10,8 @@ import java.util.UUID;
 @Builder
 public class DoctorLoad {
 
+    private UUID id;
+
     private UUID doctorId;
 
     private Double manualExtraHours;

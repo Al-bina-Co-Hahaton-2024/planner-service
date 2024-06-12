@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.albina.planner.client.ReferenceClient;
 import ru.albina.planner.domain.WorkScheduleEntity;
+import ru.albina.planner.exception.EntityNotFoundException;
 import ru.albina.planner.repository.WorkScheduleRepository;
 
 import java.time.LocalDate;
@@ -65,6 +66,15 @@ public class WorkScheduleService {
     @Transactional(readOnly = true)
     public Optional<WorkScheduleEntity> findByDate(LocalDate date) {
         return this.workScheduleRepository.findByDate(date);
+    }
+
+    @Transactional(readOnly = true)
+    public WorkScheduleEntity getById(UUID id) {
+        return this.workScheduleRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException(
+                        "Can't find work scheduler by id: " + id
+                )
+        );
     }
 
     @Transactional
