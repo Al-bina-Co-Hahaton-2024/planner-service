@@ -49,7 +49,7 @@ public class PlannerRunner {
         }).toList();
 
         Flux.fromIterable(monoList)
-                .flatMap(mono -> mono.subscribeOn(Schedulers.boundedElastic()))
+                .flatMap(mono -> mono.subscribeOn(Schedulers.newParallel("queue", 4)))
                 .collectList().block();
     }
 

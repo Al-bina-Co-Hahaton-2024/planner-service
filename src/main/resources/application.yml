@@ -4,7 +4,7 @@ spring:
   datasource:
     username: ${DATABASE_USER:postgres}
     password: ${DATABASE_PASSWORD:postgres}
-    url: ${DATABASE_HOST_JDBC:jdbc:postgresql://localhost:5432}/planner?reWriteBatchedInserts=true
+    url: ${DATABASE_HOST_JDBC_PLANNER:jdbc:postgresql://localhost:5432}/planner?reWriteBatchedInserts=true
     driver-class-name: org.postgresql.Driver
   liquibase:
     change-log: classpath:/db/master.xml
