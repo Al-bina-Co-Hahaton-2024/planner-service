@@ -11,6 +11,7 @@ import ru.albina.backlib.configuration.WebConstants;
 import ru.albina.backlib.configuration.auto.OpenApiConfiguration;
 import ru.albina.backlib.model.security.LibPrincipal;
 import ru.albina.planner.dto.request.DoctorSchedulesEditRequest;
+import ru.albina.planner.dto.request.GetWorkSchedulesRequest;
 import ru.albina.planner.dto.request.WorkSchedulesRequest;
 import ru.albina.planner.dto.response.schedule.DayWorkSchedule;
 import ru.albina.planner.service.planner.PlannerRunner;
@@ -50,6 +51,24 @@ public class WorkSchedulesController {
             @RequestParam("date") LocalDate workScheduleDate
     ) {
         return this.workScheduleUserService.getDayWorkSchedulesWithProduction(workScheduleDate);
+    }
+
+    @Operation(
+            summary = "Получить график за месяц с фильтрами",
+            security = @SecurityRequirement(name = OpenApiConfiguration.JWT),
+            responses = {
+                    @ApiResponse(
+                            description = "ОК",
+                            responseCode = "200"
+                    )
+            }
+    )
+    //TODO @PreAuthorize("hasAnyRole('ADMIN')")
+    @PostMapping("/find")
+    public List<DayWorkSchedule> getWorkSchedules(
+            @RequestBody GetWorkSchedulesRequest request
+    ) {
+        return this.workScheduleUserService.getDayWorkSchedulesWithProductionWithFilter(request);
     }
 
     @Operation(
