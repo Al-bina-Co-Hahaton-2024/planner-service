@@ -72,4 +72,7 @@
             <column name="doctor_schedule_id"/>
         </createIndex>
     </changeSet>
+    <changeSet id="004" author="alexander (bigtows) chapchuk">
+        <addUniqueConstraint tableName="work_schedule" columnNames="date"/>
+    </changeSet>
 </databaseChangeLog>
