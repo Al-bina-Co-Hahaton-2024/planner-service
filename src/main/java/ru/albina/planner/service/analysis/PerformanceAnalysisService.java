@@ -35,6 +35,9 @@ public class PerformanceAnalysisService {
                 .orElse(0);
 
         return PerformanceAnalysis.builder()
+                .modality(request.getModality())
+                .typeModality(request.getTypeModality())
+                .hours(request.getHours())
                 .work(this.performanceService.calculatePerformance(doctorPerformance, request.getHours()))
                 .build();
     }

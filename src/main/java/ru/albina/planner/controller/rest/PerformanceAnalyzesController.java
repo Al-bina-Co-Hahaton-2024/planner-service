@@ -1,6 +1,7 @@
 package ru.albina.planner.controller.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,9 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.albina.backlib.configuration.WebConstants;
 import ru.albina.backlib.configuration.auto.OpenApiConfiguration;
 import ru.albina.planner.dto.request.PerformanceAnalysisRequest;
-import ru.albina.planner.dto.response.analysis.AnalysisPerWeekDto;
 import ru.albina.planner.dto.response.performance.PerformanceAnalysis;
 import ru.albina.planner.service.analysis.PerformanceAnalysisService;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -33,15 +35,15 @@ public class PerformanceAnalyzesController {
                     @ApiResponse(
                             description = "ОК",
                             responseCode = "200",
-                            content = @Content(schema = @Schema(implementation = AnalysisPerWeekDto.class))
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = PerformanceAnalysis.class)))
                     )
             }
     )
     //TODO @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping("/perform")
-    public PerformanceAnalysis perform(
-            @RequestBody PerformanceAnalysisRequest performanceAnalysisRequest
+    public List<PerformanceAnalysis> perform(
+            @RequestBody List<PerformanceAnalysisRequest> performanceAnalysisRequest
     ) {
-        return this.performanceAnalysisService.perform(performanceAnalysisRequest);
+        return performanceAnalysisRequest.stream().map(this.performanceAnalysisService::perform).toList();
     }
 }
