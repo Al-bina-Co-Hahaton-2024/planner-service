@@ -31,7 +31,7 @@ public class PlannerScheduleService {
                 .collect(Collectors.groupingBy(WorkScheduleEntity::getWeekNumber, Collectors.toList()));
         for (final var weekToDay : schedule.entrySet()) {
             final var days = weekToDay.getValue().stream()
-                    .collect(Collectors.toMap(WorkScheduleEntity::getDate, WorkScheduleEntity::getDoctorSchedules));
+                    .collect(Collectors.toMap(WorkScheduleEntity::getDate, WorkScheduleEntity::getDoctorSchedules, (a, b) -> a));
 
             result.add(ScheduleDto.builder()
                     .weekNumber(weekToDay.getKey())
