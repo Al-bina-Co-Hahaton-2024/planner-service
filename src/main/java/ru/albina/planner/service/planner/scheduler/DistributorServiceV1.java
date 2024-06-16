@@ -16,6 +16,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -50,7 +51,7 @@ public class DistributorServiceV1 implements DistributorService {
                 final var id = doctor.getId();
                 for (DayDto day : doctor.getDays()) {
 
-                    week.getDay(day.getDate()).setExtraHours(id, day.getExtraHours());
+                    week.getDay(day.getDate()).addExtraHours(id, day.getExtraHours());
 
                     for (TaskDto task : day.getTasks()) {
                         month.addWork(doctors.get(id), week, day.getDate(), task.getModality(), task.getHours());
@@ -135,15 +136,27 @@ public class DistributorServiceV1 implements DistributorService {
                                 .id(doctorDay.getDoctorId())
                                 .extraHours(doctorDay.getExtraModalityWorkload().values().stream().reduce(Double::sum).orElse(0d))
                                 .tasks(
-                                        doctorDay.getModalityWorkload().entrySet().stream().map(entry -> {
-                                            final var modalityContainer = ModalityMapper.from(entry.getKey());
-                                            return TaskDayDto.builder()
-                                                    .modality(modalityContainer.modality())
-                                                    .typeModality(modalityContainer.typeModality())
-                                                    .hours(entry.getValue())
-                                                    .extraHours(doctorDay.getExtraModalityWorkload().getOrDefault(entry.getKey(), 0d))
-                                                    .build();
-                                        }).toList()
+                                        Stream.concat(
+                                                doctorDay.getModalityWorkload().entrySet().stream().map(entry -> {
+                                                    final var modalityContainer = ModalityMapper.from(entry.getKey());
+                                                    return TaskDayDto.builder()
+                                                            .modality(modalityContainer.modality())
+                                                            .typeModality(modalityContainer.typeModality())
+                                                            .hours(entry.getValue())
+                                                            .extraHours(0d)
+                                                            .build();
+                                                }),
+                                                doctorDay.getExtraModalityWorkload().entrySet().stream().map(entry -> {
+                                                    final var modalityContainer = ModalityMapper.from(entry.getKey());
+                                                    return TaskDayDto.builder()
+                                                            .modality(modalityContainer.modality())
+                                                            .typeModality(modalityContainer.typeModality())
+                                                            .extraHours(entry.getValue())
+                                                            .hours(0d)
+                                                            .build();
+                                                })
+
+                                        ).toList()
                                 )
                                 .build())
                 .toList();
@@ -175,7 +188,6 @@ public class DistributorServiceV1 implements DistributorService {
         }
         return result;
     }
-
 
 
     public List<LocalDate> findDay(Week week, DoctorDto doctor) {
@@ -387,8 +399,9 @@ public class DistributorServiceV1 implements DistributorService {
             this.initDay(doctorId).addWork(modality, hours);
         }
 
-        public void setExtraHours(UUID doctorId, double hours) {
-            this.extraHours.put(doctorId, hours);
+        public void addExtraHours(UUID doctorId, double hours) {
+            final var value = this.extraHours.getOrDefault(doctorId, 0d);
+            this.extraHours.put(doctorId, value + hours);
         }
 
         public void addExtraWork(UUID doctorId, String modality, double hours) {
