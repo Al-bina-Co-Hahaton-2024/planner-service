@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class CacheConfiguration {
 
     public static final String REFERENCE_CACHE_NAME = "referenceCache";
+    public static final String REFERENCE_CACHE_NAME_2 = "referenceCache2";
 
     @Bean
     public CacheManager cacheManager() {

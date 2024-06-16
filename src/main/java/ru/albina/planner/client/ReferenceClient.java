@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static ru.albina.planner.configuration.CacheConfiguration.REFERENCE_CACHE_NAME;
+import static ru.albina.planner.configuration.CacheConfiguration.REFERENCE_CACHE_NAME_2;
 
 @Component
 public class ReferenceClient {
@@ -58,7 +59,7 @@ public class ReferenceClient {
                 .block();
     }
 
-    @Cacheable(REFERENCE_CACHE_NAME)
+    @Cacheable(REFERENCE_CACHE_NAME_2)
     public WeekNumberResult getWeek(int year, int week) {
         return this.webClient.get()
                 .uri(uriBuilder -> uriBuilder.path(WebConstants.FULL_PRIVATE + "/week-numbers/")
@@ -70,7 +71,7 @@ public class ReferenceClient {
                 .block();
     }
 
-    @Cacheable(REFERENCE_CACHE_NAME)
+    @Cacheable(REFERENCE_CACHE_NAME_2)
     public List<WeekNumberResult> getWeeks(Collection<LocalDate> localDates) {
         return this.webClient.get()
                 .uri(uriBuilder -> uriBuilder.path(WebConstants.FULL_PRIVATE + "/week-numbers").queryParam("dates", localDates).build())
