@@ -10,12 +10,14 @@ import org.springframework.web.bind.annotation.*;
 import ru.albina.backlib.configuration.WebConstants;
 import ru.albina.backlib.configuration.auto.OpenApiConfiguration;
 import ru.albina.backlib.model.security.LibPrincipal;
+import ru.albina.planner.dto.request.DoctorSchedulesAddDayRequest;
 import ru.albina.planner.dto.request.DoctorSchedulesEditRequest;
 import ru.albina.planner.dto.request.GetWorkSchedulesRequest;
 import ru.albina.planner.dto.request.WorkSchedulesRequest;
 import ru.albina.planner.dto.response.schedule.DayWorkSchedule;
 import ru.albina.planner.service.planner.PlannerRunner;
 import ru.albina.planner.service.schedule.WorkScheduleEditService;
+import ru.albina.planner.service.schedule.WorkScheduleExtraHoursService;
 import ru.albina.planner.service.schedule.WorkScheduleUserService;
 
 import java.time.LocalDate;
@@ -29,6 +31,7 @@ import java.util.UUID;
 public class WorkSchedulesController {
 
     private final WorkScheduleEditService workScheduleEditService;
+    private final WorkScheduleExtraHoursService workScheduleExtraHoursService;
 
     private final WorkScheduleUserService workScheduleUserService;
 
@@ -92,6 +95,30 @@ public class WorkSchedulesController {
         this.workScheduleEditService.extraHours(
                 workSchedulerId,
                 doctorSchedulerId,
+                doctorSchedulesEditRequest.getExtraHours()
+        );
+    }
+
+    @Operation(
+            summary = "Добавить дополнительные часы для графика",
+            security = @SecurityRequirement(name = OpenApiConfiguration.JWT),
+            responses = {
+                    @ApiResponse(
+                            description = "ОК",
+                            responseCode = "200"
+                    )
+            }
+    )
+
+
+    //TODO @PreAuthorize("hasAnyRole('ADMIN')")
+    @PostMapping("/add-day")
+    public void addDay(
+            @RequestBody DoctorSchedulesAddDayRequest doctorSchedulesEditRequest
+    ) {
+        this.workScheduleExtraHoursService.addExtraHours(
+                doctorSchedulesEditRequest.getDate(),
+                doctorSchedulesEditRequest.getDoctorId(),
                 doctorSchedulesEditRequest.getExtraHours()
         );
     }
