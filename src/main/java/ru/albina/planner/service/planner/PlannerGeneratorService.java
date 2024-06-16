@@ -1,12 +1,14 @@
 package ru.albina.planner.service.planner;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.albina.planner.client.ReferenceClient;
 import ru.albina.planner.dto.planner.PlannerDto;
 
 import java.time.LocalDate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PlannerGeneratorService {
@@ -20,6 +22,7 @@ public class PlannerGeneratorService {
 
     public PlannerDto generateRequest(LocalDate templateDate) {
         final var startDate = templateDate.withDayOfMonth(1);
+        log.info("Loading {} - {} - {}", startDate, startDate.getYear(), startDate.getMonthValue());
         return PlannerDto.builder()
                 .month(startDate)
                 .monthlyHours(this.referenceClient.getHours(startDate.getYear(), startDate.getMonthValue()))
