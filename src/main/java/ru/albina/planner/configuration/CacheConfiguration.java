@@ -15,6 +15,6 @@ public class CacheConfiguration {
 
     @Bean
     public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager(REFERENCE_CACHE_NAME);
+        return new ConcurrentMapCacheManager(REFERENCE_CACHE_NAME, REFERENCE_CACHE_NAME_2);
     }
 }
