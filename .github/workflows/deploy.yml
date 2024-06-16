@@ -70,7 +70,7 @@ jobs:
         with:
           release: ${{ github.event.repository.name }}
           namespace: app
-          timeout: 190s
+          timeout: 20m
           chart: .
           token: '${{ github.token }}'
           tag: main
