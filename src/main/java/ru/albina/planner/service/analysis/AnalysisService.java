@@ -10,6 +10,7 @@ import ru.albina.planner.dto.medical.Doctor;
 import ru.albina.planner.dto.medical.Performance;
 import ru.albina.planner.dto.reference.GetOrGenerateYearlyWorkloadRequest;
 import ru.albina.planner.dto.request.AnalysisPerWeekRequest;
+import ru.albina.planner.dto.response.analysis.AnalysisDayWorkload;
 import ru.albina.planner.dto.response.analysis.AnalysisPerWeekDto;
 import ru.albina.planner.dto.response.analysis.AnalysisWorkload;
 import ru.albina.planner.mapper.ModalityMapper;
@@ -17,6 +18,7 @@ import ru.albina.planner.service.calendar.CalendarService;
 import ru.albina.planner.service.planner.PerformanceService;
 import ru.albina.planner.service.schedule.WorkScheduleService;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -46,10 +48,15 @@ public class AnalysisService {
 
         boolean isActual = true;
 
+        final var dayToCountEmployees = new HashMap<LocalDate, Integer>();
+
         for (final var schedule : schedules) {
             isActual = isActual && schedule.getIsActual();
             schedule.getDoctorSchedules().forEach(doctorSchedule -> {
                 doctorSchedule.getDoctorWorks().forEach(work -> {
+
+                    inc(dayToCountEmployees, schedule.getDate());
+
                     final var doctorPerformance = Optional.ofNullable(doctors.get(doctorSchedule.getDoctorId()))
                             .map(Doctor::getPerformances)
                             .orElse(List.of()).stream()
@@ -105,7 +112,24 @@ public class AnalysisService {
                 .weekNumber(week)
                 .year(year)
                 .workloads(analyzes)
+                .dayWorkloads(
+                        dayToCountEmployees.entrySet().stream()
+                                .map(entry -> AnalysisDayWorkload.builder()
+                                        .date(entry.getKey())
+                                        .doctors(entry.getValue())
+                                        .build()
+                                ).toList()
+                )
                 .build();
+    }
+
+
+    private void inc(Map<LocalDate, Integer> storage, LocalDate date) {
+        if (!storage.containsKey(date)) {
+            storage.put(date, 1);
+        } else {
+            storage.put(date, storage.get(date) + 1);
+        }
     }
 
 
