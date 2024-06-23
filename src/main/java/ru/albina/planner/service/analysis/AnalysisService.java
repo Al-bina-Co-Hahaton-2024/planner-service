@@ -53,9 +53,8 @@ public class AnalysisService {
         for (final var schedule : schedules) {
             isActual = isActual && schedule.getIsActual();
             schedule.getDoctorSchedules().forEach(doctorSchedule -> {
+                inc(dayToCountEmployees, schedule.getDate());
                 doctorSchedule.getDoctorWorks().forEach(work -> {
-
-                    inc(dayToCountEmployees, schedule.getDate());
 
                     final var doctorPerformance = Optional.ofNullable(doctors.get(doctorSchedule.getDoctorId()))
                             .map(Doctor::getPerformances)
