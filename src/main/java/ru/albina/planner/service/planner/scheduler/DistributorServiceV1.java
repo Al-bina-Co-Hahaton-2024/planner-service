@@ -23,6 +23,8 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class DistributorServiceV1 implements DistributorService {
 
+    public static final Integer MAX_PER_DAY = 260;
+
     private final PerformanceService performanceService;
     /*
     Правила
@@ -73,6 +75,9 @@ public class DistributorServiceV1 implements DistributorService {
                 final var possibleDayOfWeek = this.findDay(workingWeek, doctor);
                 //log.info("Doctor {} can work at {}", doctor.getId(), possibleDayOfWeek);
                 for (LocalDate localDate : possibleDayOfWeek) {
+                    if (workingWeek.isOverhead(localDate)){
+                        continue;
+                    }
                     if (workingWeek.isOverhead(doctor.getId())) {
                         break;
                     }
@@ -348,6 +353,11 @@ public class DistributorServiceV1 implements DistributorService {
 
         public boolean isOverhead(UUID doctorId) {
             return this.hours.getOrDefault(doctorId, 0d) > 40;
+        }
+
+        public boolean isOverhead(LocalDate localDate) {
+            final var day = this.getDay(localDate);
+            return day.getDoctors().size() >= MAX_PER_DAY;
         }
 
         public void addHours(UUID doctorId, double hours) {
